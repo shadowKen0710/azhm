@@ -1,5 +1,13 @@
 # 阿兹海默症患者守护 App（POC）
 
+**在线预览**：https://shadowken0710.github.io/azhm/ ·
+**仓库**：https://github.com/shadowKen0710/azhm
+
+> 顶部可切「照护者 ⇄ 患者」与四态开关。患者大屏被动事件可直达：
+> [家人来电](https://shadowken0710.github.io/azhm/patient?call=family) ·
+> [AI 来电](https://shadowken0710.github.io/azhm/patient?call=ai) ·
+> [到点提醒](https://shadowken0710.github.io/azhm/patient?remind=1)
+
 带界面的 POC：**照护者监控**患者健康安全为主，**患者**通过大屏零操作被动接收家人 / AI 仿真家人的通话；并覆盖用药日程提醒、一键 SOS、认人卡、AI 声线陪伴。
 
 - 照护者端 = 竖屏手机控制台；患者端 = 横屏智能屏/电视大屏。
