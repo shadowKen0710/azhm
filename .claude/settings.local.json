@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=460,1000 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/home-normal2.png http://localhost:5173/?state=normal)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=460,1000 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/home-normal3.png http://localhost:5173/?state=normal)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=1060,820 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/L-talk-family2.png http://localhost:5173/patient/talk/v2?by=family)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=460,1180 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/care2.png http://localhost:5173/caregiver/care)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=1060,820 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/L-remind.png http://localhost:5173/patient?remind=1)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=1060,820 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/L-standby2.png http://localhost:5173/patient)",
+      "Bash(npm i *)",
+      "Bash(npx playwright *)",
+      "Bash(git --version)",
+      "Bash(git -C /Users/gengjiayi/azhm rev-parse --is-inside-work-tree)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Read(//Users/gengjiayi/**)",
+      "Bash(ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes -T git@github.com)",
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)"
+    ]
+  }
+}

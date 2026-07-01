@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 品牌暖色 —— 家的感觉 */
+    --sun: 43 91% 62%;         /* #F6C445 参考图黄 */
+    --sun-soft: 44 96% 90%;
+    --cream: 40 55% 96%;       /* 应用底色 */
+    --ink: 240 3% 11%;         /* 近黑 · 文字与胶囊按钮 */
+
+    /* shadcn tokens 映射到暖色系 */
+    --background: 40 55% 96%;
+    --foreground: 240 3% 11%;
+    --card: 45 50% 99%;
+    --card-foreground: 240 3% 11%;
+    --primary: 240 3% 11%;
+    --primary-foreground: 40 55% 97%;
+    --secondary: 44 96% 90%;
+    --secondary-foreground: 240 3% 11%;
+    --muted: 42 30% 92%;
+    --muted-foreground: 40 6% 52%;
+    --accent: 43 91% 62%;
+    --accent-foreground: 240 3% 11%;
+    --destructive: 4 82% 58%;
+    --destructive-foreground: 40 55% 97%;
+    --border: 40 18% 88%;
+    --input: 40 18% 88%;
+    --ring: 43 91% 62%;
+    --radius: 1.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+  }
+}

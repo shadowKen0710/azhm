@@ -1,0 +1,69 @@
+import { expect, test } from "@playwright/test"
+
+// 关键交互链路走查（对应 SPEC §7 / §11）。
+
+test("角色切换：照护者 ⇄ 患者", async ({ page }) => {
+  await page.goto("/caregiver")
+  await expect(page.getByText("本周", { exact: false })).toBeVisible()
+
+  await page.getByRole("button", { name: "患者" }).click()
+  await page.waitForURL("**/patient")
+  await expect(page.getByText("紧急求助")).toBeVisible()
+})
+
+test("远程呼叫 → 患者大屏被动自动接通（真人来电，无 AI 明示）", async ({
+  page,
+}) => {
+  await page.goto("/caregiver/care")
+  await page.getByRole("button", { name: "现在呼叫患者" }).click()
+
+  // 跳到患者大屏并弹出来电覆盖层（覆盖层独有文案，避开待机页演示按钮）
+  await page.waitForURL("**/patient")
+  await expect(page.getByText("想和你说说话", { exact: false })).toBeVisible({
+    timeout: 8000,
+  })
+
+  // 无需任何点击，倒计时结束自动接通 → 通话页
+  await page.waitForURL("**/patient/talk/**", { timeout: 8000 })
+  await expect(page.getByText("正在和女儿通话")).toBeVisible()
+  // 真人来电不显示 AI 明示
+  await expect(page.getByText("AI 模拟声音")).toHaveCount(0)
+})
+
+test("患者主动拨出 → AI 通话显示「AI 模拟声音」明示", async ({ page }) => {
+  await page.goto("/patient")
+  await page
+    .getByRole("button", { name: /小雯/ })
+    .first()
+    .click()
+
+  await page.waitForURL("**/patient/talk/**")
+  await expect(page.getByText("AI 模拟声音")).toBeVisible()
+  await expect(page.getByText("正在聆听", { exact: false })).toBeVisible()
+})
+
+test("SOS 倒计时可撤销", async ({ page }) => {
+  await page.goto("/patient")
+  await page.getByRole("button", { name: "紧急求助" }).click()
+  await expect(page.getByText("正在呼叫家人", { exact: false })).toBeVisible()
+
+  await page.getByRole("button", { name: "取消" }).click()
+  // 覆盖层关闭，回到待机（SOS 按钮仍在，呼叫态消失）
+  await expect(page.getByText("正在呼叫家人", { exact: false })).toHaveCount(0)
+  await expect(page.getByRole("button", { name: "紧急求助" })).toBeVisible()
+})
+
+test("到点提醒 → 已完成闭环", async ({ page }) => {
+  await page.goto("/patient?remind=1")
+  await expect(page.getByText("该吃药啦")).toBeVisible()
+
+  await page.getByRole("button", { name: "已完成" }).click()
+  await expect(page.getByText("真棒，已完成")).toBeVisible()
+})
+
+test("患者屏韧性：错误态不暴露技术错误，SOS 仍可用", async ({ page }) => {
+  await page.goto("/patient")
+  await page.getByRole("button", { name: "错误" }).click()
+  await expect(page.getByText("连接有点慢", { exact: false })).toBeVisible()
+  await expect(page.getByRole("button", { name: "紧急求助" })).toBeVisible()
+})
