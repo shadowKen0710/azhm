@@ -74,7 +74,7 @@ test("SOS 倒计时可撤销", async ({ page }) => {
 
 test("到点提醒 → 已完成闭环", async ({ page }) => {
   await page.goto("/patient?remind=1")
-  await expect(page.getByText("该吃药啦")).toBeVisible()
+  await expect(page.getByText("该量血压啦")).toBeVisible()
 
   await page.getByRole("button", { name: "已完成" }).click()
   await expect(page.getByText("真棒，已完成")).toBeVisible()

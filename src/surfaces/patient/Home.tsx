@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Check,
+  ChevronRight,
   Clock,
+  Footprints,
+  GlassWater,
+  HeartPulse,
+  Phone,
   PhoneIncoming,
   Pill,
   ShieldAlert,
@@ -11,11 +16,49 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { useCall, type IncomingCall } from "@/components/call"
-import { useMonitor } from "@/state/monitor"
+import {
+  useMonitor,
+  type MonReminder,
+  type MonReminderIcon,
+} from "@/state/monitor"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
 import { usePatientHome } from "@/queries/hooks"
 import type { PatientFamily } from "@/services/patient"
+
+const reminderIcon: Record<MonReminderIcon, typeof Pill> = {
+  pill: Pill,
+  heart: HeartPulse,
+  walk: Footprints,
+  phone: Phone,
+  water: GlassWater,
+}
+
+const reminderHeadline: Record<MonReminderIcon, string> = {
+  pill: "该吃药啦",
+  heart: "该量血压啦",
+  walk: "该活动一下啦",
+  phone: "到时间啦",
+  water: "该喝水啦",
+}
+
+/** 实时时钟。 */
+function useNow() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  return now
+}
+
+function greetingOf(h: number) {
+  if (h < 5) return "夜里好"
+  if (h < 11) return "早上好"
+  if (h < 13) return "中午好"
+  if (h < 18) return "下午好"
+  return "晚上好"
+}
 
 const CALLERS: Record<string, IncomingCall> = {
   family: { by: "family", voiceId: "v2", name: "秀兰", relation: "老伴", initial: "兰", tone: "mint" },
@@ -26,24 +69,45 @@ export function PatientHome() {
   const { status, data } = usePatientHome()
   const [params] = useSearchParams()
   const { pending, clearCall } = useCall()
+  const mon = useMonitor()
+  const now = useNow()
   const [sos, setSos] = useState(false)
   const [incoming, setIncoming] = useState<IncomingCall | null>(
     () => CALLERS[params.get("call") ?? ""] ?? null
   )
-  const [remind, setRemind] = useState<boolean>(() => params.get("remind") === "1")
+  const [remindItem, setRemindItem] = useState<MonReminder | null>(null)
 
   // 照护者远程发起的来电 → 患者大屏被动收到
   useEffect(() => {
     if (pending) setIncoming(pending)
   }, [pending])
 
+  // URL ?remind=1 → 直接弹出到点提醒（取用药提醒）
+  useEffect(() => {
+    if (params.get("remind") === "1") {
+      const med = mon.reminders.find((r) => r.id === "r2")
+      if (med) setRemindItem(med)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const dismissCall = () => {
     setIncoming(null)
     clearCall()
   }
 
+  const nextReminder =
+    [...mon.reminders]
+      .filter((r) => r.status === "pending")
+      .sort((a, b) => a.time.localeCompare(b.time))[0] ?? null
+
   if (status === "loading") return <GentleLoading />
 
+  const greeting = greetingOf(now.getHours())
+  const timeLabel = `${String(now.getHours()).padStart(2, "0")}:${String(
+    now.getMinutes()
+  ).padStart(2, "0")}`
+  const dateLabel = `${now.getMonth() + 1}月${now.getDate()}日`
   const family = data?.family ?? []
 
   return (
@@ -52,14 +116,14 @@ export function PatientHome() {
       <div className="flex w-[56%] flex-col justify-between p-9">
         <div>
           <p className="font-display text-4xl font-extrabold leading-tight text-ink">
-            {data?.greeting ?? "你好"}，{data?.patientName ?? ""}
+            {greeting}，{data?.patientName ?? "您好"}
           </p>
           <div className="mt-3 flex items-baseline gap-3">
             <span className="font-display text-[5rem] font-extrabold leading-none text-ink">
-              {data?.timeLabel ?? "--:--"}
+              {timeLabel}
             </span>
             <span className="text-xl font-semibold text-muted-foreground">
-              {data?.dateLabel ?? ""}
+              {dateLabel}
             </span>
           </div>
         </div>
@@ -69,20 +133,24 @@ export function PatientHome() {
             现在连接有点慢，先歇一会儿，家人随时会来看你。
           </div>
         ) : (
-          data?.nextReminder && (
-            <div className="flex items-center gap-4 rounded-4xl bg-sun px-6 py-4">
+          nextReminder && (
+            <button
+              onClick={() => setRemindItem(nextReminder)}
+              className="flex items-center gap-4 rounded-4xl bg-sun px-6 py-4 text-left transition-transform active:scale-[0.99]"
+            >
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ink text-cream font-display text-lg font-extrabold">
-                {data.nextReminder.time.split(":")[0]}
+                {nextReminder.time.split(":")[0]}
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-bold text-ink/60">
-                  接下来 · {data.nextReminder.time}
+                  接下来 · {nextReminder.time}
                 </p>
                 <p className="text-xl font-extrabold text-ink">
-                  {data.nextReminder.title}
+                  {nextReminder.title}
                 </p>
               </div>
-            </div>
+              <ChevronRight className="h-6 w-6 text-ink/50" />
+            </button>
           )
         )}
 
@@ -121,13 +189,27 @@ export function PatientHome() {
         )}
 
         <div className="mt-auto">
-          <DemoPanel onCall={setIncoming} onRemind={() => setRemind(true)} />
+          <DemoPanel
+            onCall={setIncoming}
+            onRemind={() =>
+              setRemindItem(
+                nextReminder ??
+                  mon.reminders.find((r) => r.id === "r2") ??
+                  null
+              )
+            }
+          />
         </div>
       </div>
 
       {sos && <SosOverlay onClose={() => setSos(false)} />}
       {incoming && <IncomingOverlay call={incoming} onEnd={dismissCall} />}
-      {remind && <ReminderOverlay onClose={() => setRemind(false)} />}
+      {remindItem && (
+        <ReminderOverlay
+          reminder={remindItem}
+          onClose={() => setRemindItem(null)}
+        />
+      )}
     </div>
   )
 }
@@ -198,22 +280,29 @@ function DemoPanel({
 }
 
 /** 到点提醒覆盖层（大屏被动弹出）：见 SPEC §6.4。 */
-function ReminderOverlay({ onClose }: { onClose: () => void }) {
+function ReminderOverlay({
+  reminder,
+  onClose,
+}: {
+  reminder: MonReminder
+  onClose: () => void
+}) {
   const { completeReminder } = useMonitor()
   const [done, setDone] = useState(false)
+  const Icon = reminderIcon[reminder.icon]
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-sun px-10 text-center">
       {!done ? (
         <>
           <span className="grid h-28 w-28 place-items-center rounded-full bg-ink text-cream">
-            <Pill className="h-14 w-14" strokeWidth={2.2} />
+            <Icon className="h-14 w-14" strokeWidth={2.2} />
           </span>
           <p className="mt-6 font-display text-5xl font-extrabold text-ink">
-            该吃药啦
+            {reminderHeadline[reminder.icon]}
           </p>
           <p className="mt-3 text-2xl font-semibold text-ink/80">
-            占位提醒 · 午间血压药
+            {reminder.title}
           </p>
           <p className="mt-2 text-lg font-semibold text-ink/60">
             🔊 女儿声线正在提醒你
@@ -222,7 +311,7 @@ function ReminderOverlay({ onClose }: { onClose: () => void }) {
           <div className="mt-9 flex gap-5">
             <button
               onClick={() => {
-                completeReminder("r2")
+                completeReminder(reminder.id)
                 setDone(true)
               }}
               className="flex items-center gap-2 rounded-[2rem] bg-ink px-10 py-5 text-2xl font-extrabold text-cream"
@@ -272,16 +361,19 @@ function IncomingOverlay({
 }) {
   const navigate = useNavigate()
   const [count, setCount] = useState(3)
+  // onEnd 持有于 ref，避免父级每秒重渲染（实时时钟）改变其身份而重置倒计时
+  const onEndRef = useRef(onEnd)
+  onEndRef.current = onEnd
 
   useEffect(() => {
     if (count === 0) {
-      onEnd()
+      onEndRef.current()
       navigate(`/patient/talk/${call.voiceId}?incoming=1&by=${call.by}`)
       return
     }
     const t = setTimeout(() => setCount((c) => c - 1), 1000)
     return () => clearTimeout(t)
-  }, [count, call, navigate, onEnd])
+  }, [count, call, navigate])
 
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center gap-12 bg-ink px-16 text-cream">
