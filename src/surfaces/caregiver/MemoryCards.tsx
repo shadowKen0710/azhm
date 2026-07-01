@@ -9,11 +9,11 @@ import {
 } from "@/components/states"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import { getMemoryCards, type FamilyMember } from "@/services/family"
+import { useMemoryCards } from "@/queries/hooks"
+import type { FamilyMember } from "@/services/family"
 
 export function MemoryCards() {
-  const { status, data, retry } = useResource(getMemoryCards)
+  const { status, data, retry } = useMemoryCards()
 
   return (
     <>

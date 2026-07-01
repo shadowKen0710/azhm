@@ -3,7 +3,8 @@
 **在线预览**：https://shadowken0710.github.io/azhm/ ·
 **仓库**：https://github.com/shadowKen0710/azhm
 
-> 顶部可切「照护者 ⇄ 患者」与四态开关。患者大屏被动事件可直达：
+> 照护者控制台需登录（`/login` 一键演示登录）；患者大屏为公开 kiosk 无需登录。
+> 患者大屏被动事件可直达：
 > [家人来电](https://shadowken0710.github.io/azhm/patient?call=family) ·
 > [AI 来电](https://shadowken0710.github.io/azhm/patient?call=ai) ·
 > [到点提醒](https://shadowken0710.github.io/azhm/patient?remind=1)
@@ -31,7 +32,8 @@ npm run test:e2e   # Playwright 关键交互链路测试（需 npx playwright in
 
 ## 技术栈
 
-React + Vite + TypeScript + Tailwind + shadcn/ui。
+React + Vite + TypeScript + Tailwind + shadcn/ui + React Router + **TanStack Query**（数据层）。
+框架：鉴权上下文 + 受保护路由（照护者）/ 公开 kiosk（患者）、懒加载 + 错误边界 + 404。数据仍为 mock，经 service 层抽象。
 
 ## 目录速览
 

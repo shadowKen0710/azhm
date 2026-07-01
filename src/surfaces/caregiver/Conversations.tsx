@@ -9,11 +9,10 @@ import {
 } from "@/components/states"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import {
-  getConversations,
-  type ConversationItem,
-  type ConvMood,
+import { useConversations } from "@/queries/hooks"
+import type {
+  ConversationItem,
+  ConvMood,
 } from "@/services/conversations"
 
 const moods: Record<ConvMood, { label: string; dot: string; text: string }> = {
@@ -30,7 +29,7 @@ function formatDuration(sec: number) {
 }
 
 export function Conversations() {
-  const { status, data, retry } = useResource(getConversations)
+  const { status, data, retry } = useConversations()
 
   return (
     <>

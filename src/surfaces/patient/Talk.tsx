@@ -3,8 +3,8 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 import { cn } from "@/lib/utils"
 import { toneBg, type Tone } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import { getPatientTalk, type TalkTurn } from "@/services/patient"
+import { usePatientTalk } from "@/queries/hooks"
+import type { TalkTurn } from "@/services/patient"
 
 export function PatientTalk() {
   const { voiceId } = useParams()
@@ -12,7 +12,7 @@ export function PatientTalk() {
   const navigate = useNavigate()
   const isAi = params.get("by") !== "family" // 家人来电=真人；其余为 AI 模拟
 
-  const { status, data } = useResource(getPatientTalk(voiceId ?? ""))
+  const { status, data } = usePatientTalk(voiceId ?? "")
 
   if (status === "loading") return <Connecting />
   if (status === "error" || !data)

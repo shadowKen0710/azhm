@@ -2,6 +2,25 @@ import { expect, test } from "@playwright/test"
 
 // 关键交互链路走查（对应 SPEC §7 / §11）。
 
+// 默认注入已登录态，让受保护的照护者路由直接可达；患者 kiosk 不受影响。
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "azhm.auth",
+      JSON.stringify({ name: "李阿姨", role: "caregiver", relation: "女儿" })
+    )
+  })
+})
+
+test("未登录访问照护者 → 跳登录 → 登录后进入", async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem("azhm.auth"))
+  await page.goto("/caregiver/alerts")
+  await page.waitForURL("**/login")
+  await page.getByRole("button", { name: "登录" }).click()
+  await page.waitForURL(/\/caregiver/)
+  await expect(page.getByRole("heading", { name: /告警/ })).toBeVisible()
+})
+
 test("角色切换：照护者 ⇄ 患者", async ({ page }) => {
   await page.goto("/caregiver")
   await expect(page.getByText("本周", { exact: false })).toBeVisible()

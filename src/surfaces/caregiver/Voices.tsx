@@ -10,8 +10,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import { getVoices, type VoiceProfile } from "@/services/family"
+import { useVoices } from "@/queries/hooks"
+import type { VoiceProfile } from "@/services/family"
 
 /** 秒数换算成「3分34秒」样本时长小字。 */
 function formatSample(seconds: number) {
@@ -21,7 +21,7 @@ function formatSample(seconds: number) {
 }
 
 export function Voices() {
-  const { status, data, retry } = useResource(getVoices)
+  const { status, data, retry } = useVoices()
 
   return (
     <>

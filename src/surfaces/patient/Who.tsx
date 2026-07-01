@@ -9,11 +9,10 @@ import { useNavigate } from "react-router-dom"
 
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import { getMemoryCards } from "@/services/family"
+import { useMemoryCards } from "@/queries/hooks"
 
 export function PatientWho() {
-  const { status, data } = useResource(getMemoryCards)
+  const { status, data } = useMemoryCards()
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
 

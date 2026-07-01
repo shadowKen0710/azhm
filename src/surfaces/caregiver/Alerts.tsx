@@ -17,8 +17,8 @@ import {
   SkeletonRows,
 } from "@/components/states"
 import { cn } from "@/lib/utils"
-import { useResource } from "@/lib/useResource"
-import { getAlerts, type SosEvent, type SosState } from "@/services/alerts"
+import { useAlerts } from "@/queries/hooks"
+import type { SosEvent, SosState } from "@/services/alerts"
 import { useMonitor, type MonAlert } from "@/state/monitor"
 
 const monKindIcon: Record<MonAlert["kind"], typeof PillBottle> = {
@@ -43,7 +43,7 @@ function hhmm(ts: number) {
 }
 
 export function Alerts() {
-  const { status, data, retry } = useResource(getAlerts)
+  const { status, data, retry } = useAlerts()
   const mon = useMonitor()
 
   return (

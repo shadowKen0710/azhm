@@ -21,8 +21,8 @@ import { Button } from "@/components/ui/button"
 import { StatusBanner } from "@/components/MonitorControls"
 import { EmptyState, SectionTitle, Sheet } from "@/components/states"
 import { cn } from "@/lib/utils"
-import { useResource } from "@/lib/useResource"
-import { getDashboard, type DashboardData } from "@/services/dashboard"
+import { useDashboard } from "@/queries/hooks"
+import type { DashboardData } from "@/services/dashboard"
 import type { DayCell, Mood, ReminderItem } from "@/mock/dashboard"
 
 const moodIcon: Record<Mood, typeof Smile> = {
@@ -40,7 +40,7 @@ const reminderIcon: Record<ReminderItem["icon"], typeof Pill> = {
 }
 
 export function Dashboard() {
-  const { status, data, retry } = useResource(getDashboard)
+  const { status, data, retry } = useDashboard()
 
   if (status === "loading") return <LoadingState />
   if (status === "error") return <ErrorState onRetry={retry} />

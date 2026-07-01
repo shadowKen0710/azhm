@@ -10,11 +10,11 @@ import {
 import { InlineError, PageHeader, Sheet, SkeletonRows } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useResource } from "@/lib/useResource"
-import { getSettings, type SettingsData } from "@/services/settings"
+import { useSettings } from "@/queries/hooks"
+import type { SettingsData } from "@/services/settings"
 
 export function Settings() {
-  const { status, data, retry } = useResource(getSettings)
+  const { status, data, retry } = useSettings()
 
   return (
     <>

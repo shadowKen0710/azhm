@@ -1,17 +1,36 @@
-import { HeartHandshake, House, Pill, Settings, Siren } from "lucide-react"
+import { HeartHandshake, House, LogOut, Pill, Settings, Siren } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 
+import { useAuth } from "@/auth/AuthContext"
 import { DemoToggle } from "@/components/demo"
 import { cn } from "@/lib/utils"
 
-/** 顶栏：角色切换（照护者 / 患者）+ 演示态开关。手机框之外的演示外壳。 */
+/** 顶栏：角色切换（照护者 / 患者）+ 演示态开关 + 已登录用户/退出。 */
 export function TopBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { user, isAuthenticated, logout } = useAuth()
   const isPatient = pathname.startsWith("/patient")
 
   return (
     <div className="mb-5 space-y-3">
+      {isAuthenticated && (
+        <div className="flex items-center justify-between px-1">
+          <span className="text-sm font-semibold text-muted-foreground">
+            {user?.name} · 照护者
+          </span>
+          <button
+            onClick={() => {
+              logout()
+              navigate("/login", { replace: true })
+            }}
+            className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-bold text-ink shadow-soft"
+          >
+            <LogOut className="h-4 w-4" />
+            退出
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-1 rounded-full bg-card p-1 shadow-soft">
         <RoleTab active={!isPatient} onClick={() => navigate("/caregiver")}>
           照护者

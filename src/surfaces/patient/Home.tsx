@@ -14,8 +14,8 @@ import { useCall, type IncomingCall } from "@/components/call"
 import { useMonitor } from "@/state/monitor"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
-import { useResource } from "@/lib/useResource"
-import { getPatientHome, type PatientFamily } from "@/services/patient"
+import { usePatientHome } from "@/queries/hooks"
+import type { PatientFamily } from "@/services/patient"
 
 const CALLERS: Record<string, IncomingCall> = {
   family: { by: "family", voiceId: "v2", name: "秀兰", relation: "老伴", initial: "兰", tone: "mint" },
@@ -23,7 +23,7 @@ const CALLERS: Record<string, IncomingCall> = {
 }
 
 export function PatientHome() {
-  const { status, data } = useResource(getPatientHome)
+  const { status, data } = usePatientHome()
   const [params] = useSearchParams()
   const { pending, clearCall } = useCall()
   const [sos, setSos] = useState(false)

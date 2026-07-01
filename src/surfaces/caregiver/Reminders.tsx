@@ -16,8 +16,7 @@ import {
   SkeletonRows,
 } from "@/components/states"
 import { cn } from "@/lib/utils"
-import { useResource } from "@/lib/useResource"
-import { getReminders } from "@/services/reminders"
+import { useReminders } from "@/queries/hooks"
 import { useMonitor, type MonReminder } from "@/state/monitor"
 
 const icons = {
@@ -36,8 +35,8 @@ function periodOf(time: string) {
 }
 
 export function Reminders() {
-  // useResource 只用于四态外壳（加载/空/错误演示）；正常态渲染实时状态机数据。
-  const { status, retry } = useResource(getReminders)
+  // 查询只用于四态外壳（加载/空/错误演示）；正常态渲染实时状态机数据。
+  const { status, retry } = useReminders()
   const { reminders, completeReminder } = useMonitor()
 
   const done = reminders.filter((r) => r.status === "done").length
