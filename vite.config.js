@@ -1,11 +1,16 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-export default defineConfig({
-    plugins: [react()],
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
+// GitHub Pages 项目站点在 /azhm/ 下；本地开发仍用 /。
+export default defineConfig(function (_a) {
+    var command = _a.command;
+    return ({
+        base: command === "build" ? "/azhm/" : "/",
+        plugins: [react()],
+        resolve: {
+            alias: {
+                "@": path.resolve(__dirname, "./src"),
+            },
         },
-    },
+    });
 });
