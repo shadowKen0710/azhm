@@ -11,6 +11,7 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { useCall, type IncomingCall } from "@/components/call"
+import { useMonitor } from "@/state/monitor"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
 import { useResource } from "@/lib/useResource"
@@ -198,6 +199,7 @@ function DemoPanel({
 
 /** 到点提醒覆盖层（大屏被动弹出）：见 SPEC §6.4。 */
 function ReminderOverlay({ onClose }: { onClose: () => void }) {
+  const { completeReminder } = useMonitor()
   const [done, setDone] = useState(false)
 
   return (
@@ -219,7 +221,10 @@ function ReminderOverlay({ onClose }: { onClose: () => void }) {
 
           <div className="mt-9 flex gap-5">
             <button
-              onClick={() => setDone(true)}
+              onClick={() => {
+                completeReminder("r2")
+                setDone(true)
+              }}
               className="flex items-center gap-2 rounded-[2rem] bg-ink px-10 py-5 text-2xl font-extrabold text-cream"
             >
               <Check className="h-7 w-7" strokeWidth={3} />

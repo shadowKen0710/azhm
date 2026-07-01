@@ -37,7 +37,8 @@ npm run dev        # http://localhost:5173/
 ![提醒管理](screens/caregiver-reminders.png)
 
 ### 告警 / SOS 中心 `/caregiver/alerts`
-**SOS 全链路时间线签名卡**（触发→发送→接收→等待响应）+ mock 最后位置；历史含"未服药升级"（红条）、敏感、失联。
+**SOS 全链路时间线签名卡**（触发→发送→接收→等待响应）+ mock 最后位置。
+**真实异常状态机**（`MonitorProvider`，非预置）：在线/失联横幅 + 今日服药 X/Y；「演示 · 异常路径」控制可触发「服药计时」（约 8s 到点未确认 → 自动升级为未服药告警）与「断开患者」（约 6s 无心跳 → 失联 → 恢复自消）。历史由计时器实时生成。
 
 ![告警中心](screens/caregiver-alerts.png)
 

@@ -26,7 +26,11 @@
       "Bash(git commit -q -m ' *)",
       "Bash(brew install *)",
       "Bash(echo \"brew install gh exit: $?\")",
-      "Bash(git branch *)"
+      "Bash(git branch *)",
+      "Bash(curl -s -o /tmp/pg.html -w '%{http_code}' -L https://shadowken0710.github.io/azhm/)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -L \"https://shadowken0710.github.io/azhm/patient\")",
+      "Bash(curl -s -L \"https://shadowken0710.github.io/azhm/patient?remind=1\")"
     ]
   }
 }

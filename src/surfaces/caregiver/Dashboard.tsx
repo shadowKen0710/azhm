@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { StatusBanner } from "@/components/MonitorControls"
 import { EmptyState, SectionTitle, Sheet } from "@/components/states"
 import { cn } from "@/lib/utils"
 import { useResource } from "@/lib/useResource"
@@ -50,6 +51,9 @@ export function Dashboard() {
     <>
       <Header data={data} />
       <Sheet>
+        <div className="mb-6">
+          <StatusBanner />
+        </div>
         <SectionTitle light="本周" bold="状态" />
         <div className="mt-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <CalendarDays className="h-4 w-4" />

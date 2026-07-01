@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom"
 
 import { CallProvider } from "@/components/call"
 import { DemoProvider } from "@/components/demo"
+import { MonitorProvider } from "@/state/monitor"
 import { CaregiverLayout, PatientLayout } from "@/layouts"
 import { Dashboard } from "@/surfaces/caregiver/Dashboard"
 import { Reminders } from "@/surfaces/caregiver/Reminders"
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <DemoProvider>
       <CallProvider>
+        <MonitorProvider>
         <Routes>
         <Route path="/" element={<Navigate to="/caregiver" replace />} />
 
@@ -41,6 +43,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/caregiver" replace />} />
         </Routes>
+        </MonitorProvider>
       </CallProvider>
     </DemoProvider>
   )

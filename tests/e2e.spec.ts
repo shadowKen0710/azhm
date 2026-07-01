@@ -67,3 +67,24 @@ test("患者屏韧性：错误态不暴露技术错误，SOS 仍可用", async (
   await expect(page.getByText("连接有点慢", { exact: false })).toBeVisible()
   await expect(page.getByRole("button", { name: "紧急求助" })).toBeVisible()
 })
+
+test("状态机：用药到点未确认 → 自动升级为未服药告警", async ({ page }) => {
+  await page.goto("/caregiver/alerts")
+  // r2（午间血压药）dueAt≈8s，计时器到点后自动生成升级告警
+  await expect(page.getByText("未服药 · 午间血压药")).toBeVisible({
+    timeout: 15_000,
+  })
+  await expect(page.getByText("已自动升级", { exact: false })).toBeVisible()
+})
+
+test("状态机：断开患者 → 失联告警 → 恢复自消", async ({ page }) => {
+  await page.goto("/caregiver/alerts")
+  await page.getByRole("button", { name: "断开患者" }).click()
+  // 心跳超时（≈6s）后失联
+  await expect(page.getByText("患者失联", { exact: false })).toBeVisible({
+    timeout: 12_000,
+  })
+  await page.getByRole("button", { name: "恢复在线" }).click()
+  await expect(page.getByText("患者在线", { exact: false })).toBeVisible()
+  await expect(page.getByText("已恢复在线", { exact: false })).toBeVisible()
+})
