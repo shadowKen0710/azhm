@@ -107,3 +107,26 @@ test("状态机：断开患者 → 失联告警 → 恢复自消", async ({ page
   await expect(page.getByText("患者在线", { exact: false })).toBeVisible()
   await expect(page.getByText("已恢复在线", { exact: false })).toBeVisible()
 })
+
+test("提醒管理：新增 → 编辑 → 删除", async ({ page }) => {
+  await page.goto("/caregiver/reminders")
+
+  // 新增
+  await page.getByRole("button", { name: "新增提醒" }).click()
+  await page.getByPlaceholder("如：午间血压药").fill("测试提醒A")
+  await page.getByRole("button", { name: "添加提醒" }).click()
+  await expect(page.getByText("测试提醒A")).toBeVisible()
+
+  // 编辑（点该行进入编辑，改标题保存）
+  await page.getByText("测试提醒A").click()
+  await page.getByPlaceholder("如：午间血压药").fill("测试提醒B")
+  await page.getByRole("button", { name: "保存修改" }).click()
+  await expect(page.getByText("测试提醒B")).toBeVisible()
+  await expect(page.getByText("测试提醒A")).toHaveCount(0)
+
+  // 删除（编辑态 → 删除 → 确认删除）
+  await page.getByText("测试提醒B").click()
+  await page.getByRole("button", { name: "删除" }).click()
+  await page.getByRole("button", { name: "确认删除" }).click()
+  await expect(page.getByText("测试提醒B")).toHaveCount(0)
+})

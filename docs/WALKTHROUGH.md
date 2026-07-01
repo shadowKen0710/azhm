@@ -33,8 +33,10 @@ npm run dev        # http://localhost:5173/
 
 ### 提醒管理 `/caregiver/reminders`
 上午/下午/晚上分组；已完成 ✓ / 已错过（红）/ 待办；声线播报标记。
+**新增/编辑/删除全功能**：右上「＋」新增、点某行进入编辑；表单含类型（用药/血压/喝水/活动/通话）、时间、内容、播报声线；写回实时监护状态机并按时间排序，编辑态可删除（二次确认）。
 
 ![提醒管理](screens/caregiver-reminders.png)
+![新增/编辑提醒表单](screens/caregiver-reminder-form.png)
 
 ### 告警 / SOS 中心 `/caregiver/alerts`
 **SOS 全链路时间线签名卡**（触发→发送→接收→等待响应）+ mock 最后位置。

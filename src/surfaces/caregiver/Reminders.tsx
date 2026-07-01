@@ -1,8 +1,10 @@
+import { useState } from "react"
 import {
   Check,
   Footprints,
   GlassWater,
   HeartPulse,
+  Pencil,
   Phone,
   Pill,
   Plus,
@@ -18,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useReminders } from "@/queries/hooks"
 import { useMonitor, type MonReminder } from "@/state/monitor"
+import { ReminderForm } from "@/surfaces/caregiver/ReminderForm"
 
 const icons = {
   pill: Pill,
@@ -34,10 +37,17 @@ function periodOf(time: string) {
   return h < 12 ? "上午" : h < 18 ? "下午" : "晚上"
 }
 
+// 表单状态：关闭 / 新增 / 编辑某条
+type FormState = { open: false } | { open: true; reminder: MonReminder | null }
+
 export function Reminders() {
   // 查询只用于四态外壳（加载/空/错误演示）；正常态渲染实时状态机数据。
   const { status, retry } = useReminders()
   const { reminders, completeReminder } = useMonitor()
+  const [form, setForm] = useState<FormState>({ open: false })
+
+  const openNew = () => setForm({ open: true, reminder: null })
+  const openEdit = (r: MonReminder) => setForm({ open: true, reminder: r })
 
   const done = reminders.filter((r) => r.status === "done").length
   const sections = PERIODS.map((label) => ({
@@ -51,19 +61,21 @@ export function Reminders() {
         light="今日"
         bold="提醒"
         subtitle={`已完成 ${done}/${reminders.length}`}
-        right={<AddButton />}
+        right={<AddButton onClick={openNew} />}
       />
       <Sheet>
         {status === "loading" && <SkeletonRows rows={5} />}
         {status === "error" && <InlineError onRetry={retry} />}
         {status === "success" &&
           (sections.length === 0 ? (
-            <EmptyState
-              icon={Plus}
-              title="还没有提醒"
-              hint="添加第一条用药或日程提醒，开始守护。"
-              actionLabel="新增提醒"
-            />
+            <div onClick={openNew}>
+              <EmptyState
+                icon={Plus}
+                title="还没有提醒"
+                hint="添加第一条用药或日程提醒，开始守护。"
+                actionLabel="新增提醒"
+              />
+            </div>
           ) : (
             <div className="space-y-7">
               {sections.map((section) => (
@@ -77,6 +89,7 @@ export function Reminders() {
                         key={item.id}
                         item={item}
                         onComplete={() => completeReminder(item.id)}
+                        onEdit={() => openEdit(item)}
                       />
                     ))}
                   </ul>
@@ -85,14 +98,22 @@ export function Reminders() {
             </div>
           ))}
       </Sheet>
+
+      {form.open && (
+        <ReminderForm
+          reminder={form.reminder}
+          onClose={() => setForm({ open: false })}
+        />
+      )}
     </>
   )
 }
 
-function AddButton() {
+function AddButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       aria-label="新增提醒"
+      onClick={onClick}
       className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-cream transition-transform hover:scale-95"
     >
       <Plus className="h-5 w-5" />
@@ -103,9 +124,11 @@ function AddButton() {
 function ReminderRow({
   item,
   onComplete,
+  onEdit,
 }: {
   item: MonReminder
   onComplete: () => void
+  onEdit: () => void
 }) {
   const Icon = icons[item.icon]
   const missed = item.status === "missed"
@@ -116,35 +139,50 @@ function ReminderRow({
         missed ? "bg-secondary" : "bg-muted/50"
       )}
     >
-      <div className="flex w-11 shrink-0 flex-col items-center">
-        <span className="font-display text-sm font-extrabold text-ink">
-          {item.time.split(":")[0]}
-        </span>
-        <span className="text-[0.66rem] font-semibold text-muted-foreground">
-          {item.time.split(":")[1]}
-        </span>
-      </div>
-      <Icon className="h-5 w-5 shrink-0 text-sun" strokeWidth={2.4} />
-      <p className="flex-1 text-[0.95rem] font-medium leading-snug text-ink">
-        {item.title}
-      </p>
+      {/* 点击时间/内容区进入编辑 */}
+      <button
+        onClick={onEdit}
+        className="flex flex-1 items-center gap-3 text-left"
+      >
+        <div className="flex w-11 shrink-0 flex-col items-center">
+          <span className="font-display text-sm font-extrabold text-ink">
+            {item.time.split(":")[0]}
+          </span>
+          <span className="text-[0.66rem] font-semibold text-muted-foreground">
+            {item.time.split(":")[1]}
+          </span>
+        </div>
+        <Icon className="h-5 w-5 shrink-0 text-sun" strokeWidth={2.4} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[0.95rem] font-medium leading-snug text-ink">
+            {item.title}
+          </p>
+          {item.voice && (
+            <span className="text-xs font-semibold text-muted-foreground">
+              🔊 {item.voice}声线播报
+            </span>
+          )}
+        </div>
+        <Pencil className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+      </button>
+
       {item.status === "done" ? (
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-ink text-cream">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-cream">
           <Check className="h-4 w-4" strokeWidth={3} />
         </span>
       ) : item.status === "missed" ? (
         <button
           onClick={onComplete}
-          className="rounded-full bg-destructive px-3 py-1.5 text-xs font-bold text-destructive-foreground"
+          className="shrink-0 rounded-full bg-destructive px-3 py-1.5 text-xs font-bold text-destructive-foreground"
         >
           已错过 · 补记
         </button>
       ) : (
         <button
           onClick={onComplete}
-          className="rounded-full border-2 border-ink/15 px-3 py-1.5 text-xs font-bold text-ink"
+          className="shrink-0 rounded-full border-2 border-ink/15 px-3 py-1.5 text-xs font-bold text-ink"
         >
-          标记完成
+          完成
         </button>
       )}
     </li>

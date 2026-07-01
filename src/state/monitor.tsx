@@ -20,6 +20,7 @@ export interface MonReminder {
   medication: boolean
   status: MonReminderStatus
   dueAt: number | null // 截止时间戳；now ≥ dueAt 且仍 pending → missed
+  voice?: string // 绑定的家人声线（占位）
 }
 
 export type MonAlertKind = "missed-med" | "offline" | "recovered"
@@ -66,6 +67,15 @@ function seed(now: number): MonitorState {
   }
 }
 
+// 新增/编辑提醒的输入（不含运行时字段 status/dueAt）。
+export interface ReminderInput {
+  time: string
+  title: string
+  icon: MonReminderIcon
+  medication: boolean
+  voice?: string
+}
+
 interface MonitorValue {
   online: boolean
   lastSeenLabel: string
@@ -77,6 +87,9 @@ interface MonitorValue {
   completeReminder: (id: string) => void
   snoozeReminder: (id: string) => void
   setConnected: (v: boolean) => void
+  addReminder: (input: ReminderInput) => void
+  updateReminder: (id: string, input: ReminderInput) => void
+  removeReminder: (id: string) => void
 }
 
 const MonitorContext = createContext<MonitorValue | null>(null)
@@ -187,6 +200,34 @@ export function MonitorProvider({ children }: { children: ReactNode }) {
       return { ...p, connected: false }
     })
 
+  const byTime = (a: MonReminder, b: MonReminder) =>
+    a.time.localeCompare(b.time)
+
+  const addReminder = (input: ReminderInput) =>
+    setS((p) => {
+      const created: MonReminder = {
+        id: `r-${Date.now()}`,
+        status: "pending",
+        dueAt: null,
+        ...input,
+      }
+      return { ...p, reminders: [...p.reminders, created].sort(byTime) }
+    })
+
+  const updateReminder = (id: string, input: ReminderInput) =>
+    setS((p) => ({
+      ...p,
+      reminders: p.reminders
+        .map((r) => (r.id === id ? { ...r, ...input } : r))
+        .sort(byTime),
+    }))
+
+  const removeReminder = (id: string) =>
+    setS((p) => ({
+      ...p,
+      reminders: p.reminders.filter((r) => r.id !== id),
+    }))
+
   const meds = s.reminders.filter((r) => r.medication)
   const value: MonitorValue = {
     online: s.online,
@@ -199,6 +240,9 @@ export function MonitorProvider({ children }: { children: ReactNode }) {
     completeReminder,
     snoozeReminder,
     setConnected,
+    addReminder,
+    updateReminder,
+    removeReminder,
   }
 
   return (
