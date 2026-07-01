@@ -130,3 +130,36 @@ test("提醒管理：新增 → 编辑 → 删除", async ({ page }) => {
   await page.getByRole("button", { name: "确认删除" }).click()
   await expect(page.getByText("测试提醒B")).toHaveCount(0)
 })
+
+test("认人卡：新增 → 编辑 → 删除", async ({ page }) => {
+  await page.goto("/caregiver/memory-cards")
+
+  // 新增家人
+  await page.getByRole("button", { name: "新增家人" }).click()
+  await page.getByPlaceholder("如：小雯").fill("测试家人甲")
+  await page.getByPlaceholder("如：女儿").fill("表弟")
+  await page.getByRole("button", { name: "添加家人" }).click()
+  await expect(page.getByText("测试家人甲", { exact: true })).toBeVisible()
+
+  // 编辑（点卡片进入编辑，改姓名保存）
+  await page.getByText("测试家人甲", { exact: true }).click()
+  await page.getByPlaceholder("如：小雯").fill("测试家人乙")
+  await page.getByRole("button", { name: "保存修改" }).click()
+  await expect(page.getByText("测试家人乙", { exact: true })).toBeVisible()
+  await expect(page.getByText("测试家人甲", { exact: true })).toHaveCount(0)
+
+  // 持久化：刷新后仍在（家人档案存 localStorage，患者大屏也读同一份）
+  await page.reload()
+  await expect(page.getByText("测试家人乙", { exact: true })).toBeVisible()
+
+  // 患者「认认人」轮播能看到 5 位家人（含新增）
+  await page.goto("/patient/who")
+  await expect(page.getByText("/ 5", { exact: false })).toBeVisible()
+
+  // 删除
+  await page.goto("/caregiver/memory-cards")
+  await page.getByText("测试家人乙", { exact: true }).click()
+  await page.getByRole("button", { name: "删除" }).click()
+  await page.getByRole("button", { name: "确认删除" }).click()
+  await expect(page.getByText("测试家人乙", { exact: true })).toHaveCount(0)
+})

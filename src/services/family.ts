@@ -1,13 +1,16 @@
 import { mockFetch } from "@/services/mockFetch"
 
 // 家人档案 —— 认人卡与声线共用同一批家人（见 SPEC §5.4/§5.5）。
+export type FamilyTone = "peach" | "mint" | "sky" | "lilac"
+
 export interface FamilyMember {
   id: string
   name: string
   relation: string
   nickname: string
-  initial: string // 头像占位用首字
-  tone: "peach" | "mint" | "sky" | "lilac" // 头像底色占位
+  initial: string // 头像占位用首字（无照片时显示）
+  tone: FamilyTone // 头像底色占位
+  photo?: string // 上传的头像（DataURL）；有则优先显示
 }
 
 export interface MemoryCardsData {

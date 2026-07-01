@@ -8,11 +8,13 @@ import {
 import { useNavigate } from "react-router-dom"
 
 import { cn } from "@/lib/utils"
-import { toneBg } from "@/lib/tone"
+import { FamilyAvatar } from "@/components/FamilyAvatar"
 import { useMemoryCards } from "@/queries/hooks"
+import { useFamily } from "@/state/family"
 
 export function PatientWho() {
-  const { status, data } = useMemoryCards()
+  const { status } = useMemoryCards()
+  const { members } = useFamily()
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
 
@@ -26,7 +28,6 @@ export function PatientWho() {
       />
     )
 
-  const members = data?.members ?? []
   if (members.length === 0)
     return (
       <GentleFallback
@@ -51,14 +52,12 @@ export function PatientWho() {
 
       {/* 大头像 + 姓名（横向） */}
       <div className="flex flex-1 items-center justify-center gap-12">
-        <span
-          className={cn(
-            "grid h-48 w-48 shrink-0 place-items-center rounded-full font-display text-[6rem] font-extrabold text-ink shadow-soft",
-            toneBg[member.tone]
-          )}
-        >
-          {member.initial}
-        </span>
+        <FamilyAvatar
+          photo={member.photo}
+          initial={member.initial}
+          tone={member.tone}
+          className="h-48 w-48 shrink-0 text-[6rem] shadow-soft"
+        />
 
         <div className="text-left">
           <p className="text-2xl font-bold text-muted-foreground">

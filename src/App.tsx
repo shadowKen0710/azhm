@@ -10,6 +10,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { Fallback } from "@/components/Fallback"
 import { CaregiverLayout, PatientLayout } from "@/layouts"
 import { NotFound } from "@/surfaces/NotFound"
+import { FamilyProvider } from "@/state/family"
 import { MonitorProvider } from "@/state/monitor"
 
 // 页面按路由懒加载（代码分割）。
@@ -57,6 +58,7 @@ export default function App() {
       <AuthProvider>
         <CallProvider>
           <MonitorProvider>
+           <FamilyProvider>
             <ErrorBoundary>
               <Suspense fallback={<Fallback />}>
                 <Routes>
@@ -96,6 +98,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+           </FamilyProvider>
           </MonitorProvider>
         </CallProvider>
       </AuthProvider>

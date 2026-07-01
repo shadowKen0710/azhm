@@ -51,8 +51,10 @@ npm run dev        # http://localhost:5173/
 
 ### 认人卡管理 `/caregiver/memory-cards`
 家人头像网格 + 称呼；空态引导添加。
+**新增/编辑/删除全功能**：右上「＋」或网格末尾「添加」卡新增，点卡片进入编辑；表单含**头像上传**（本地照片，或暖色底 + 姓名末字占位）、姓名、关系、称呼；写回可写家人 store 并**持久化到 localStorage**，患者「认认人」大屏读同一份数据。编辑态可删除（二次确认）。
 
 ![认人卡管理](screens/caregiver-memory-cards.png)
+![新增/编辑家人表单](screens/caregiver-member-form.png)
 
 ### 声线管理 `/caregiver/voices`
 **授权录制提示（伦理边界）** + 学习进度可视化占位 + 撤销/重新授权。
