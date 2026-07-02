@@ -91,3 +91,8 @@ export const getPatientTalk = (voiceId: string) =>
     const caller = talkCallers[voiceId] ?? talkCallers.v1
     return { voiceId, ...caller }
   })
+
+// voiceId → 家人档案 id（记忆库按家人 id 归属）。
+const voiceToMember: Record<string, string> = { v1: "f1", v2: "f3", v3: "f2" }
+export const memberIdForVoice = (voiceId: string) =>
+  voiceToMember[voiceId] ?? "f1"

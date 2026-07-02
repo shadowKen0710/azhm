@@ -8,6 +8,7 @@ export const ROUTES = {
   memoryCards: "/caregiver/memory-cards",
   voices: "/caregiver/voices",
   conversations: "/caregiver/conversations",
+  memories: "/caregiver/memories",
   settings: "/caregiver/settings",
   patient: "/patient",
   patientTalk: (voiceId: string) => `/patient/talk/${voiceId}`,

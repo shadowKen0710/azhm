@@ -1,5 +1,6 @@
 import {
   AudioLines,
+  BookHeart,
   ChevronRight,
   MessagesSquare,
   PhoneCall,
@@ -31,6 +32,12 @@ const entries: Entry[] = [
     icon: AudioLines,
     title: "声线管理",
     desc: "授权录制家人声线，随时可撤销",
+  },
+  {
+    to: "/caregiver/memories",
+    icon: BookHeart,
+    title: "记忆库",
+    desc: "讲述你们的故事，AI 用家人声线陪患者怀旧",
   },
   {
     to: "/caregiver/conversations",

@@ -195,3 +195,22 @@ test("声线授权：录音 → 训练 → 就绪，撤销后患者不可对话"
   await page.goto("/patient")
   await expect(page.getByText("暂不可对话").first()).toBeVisible()
 })
+
+test("记忆库：看护者投喂故事 → 患者对话引用该回忆", async ({ page }) => {
+  await page.goto("/caregiver/memories")
+
+  // 给小雯(第一个家人)添加一段记忆
+  await page.getByRole("button", { name: "给小雯添加记忆" }).click()
+  await page.getByPlaceholder("如：夏夜的萤火虫").fill("放风筝")
+  await page
+    .locator("textarea")
+    .fill("你小时候最爱在广场上放那只大燕子风筝，")
+  await page.getByRole("button", { name: "让 AI 记住" }).click()
+  await expect(page.getByText("放风筝", { exact: true })).toBeVisible()
+
+  // 患者与小雯(v1)对话：AI 开场应织入该回忆
+  await page.goto("/patient/talk/v1?by=family")
+  await expect(page.getByText("放那只大燕子风筝", { exact: false })).toBeVisible(
+    { timeout: 8000 }
+  )
+})

@@ -1,10 +1,13 @@
+import { useEffect, useState } from "react"
 import { Mic, PhoneOff, Sparkles } from "lucide-react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 import { cn } from "@/lib/utils"
 import { toneBg, type Tone } from "@/lib/tone"
 import { usePatientTalk } from "@/queries/hooks"
-import type { TalkTurn } from "@/services/patient"
+import { memberIdForVoice, type TalkTurn } from "@/services/patient"
+import { companionApi } from "@/services/companionApi"
+import { useMemories } from "@/state/memories"
 
 export function PatientTalk() {
   const { voiceId } = useParams()
@@ -13,12 +16,46 @@ export function PatientTalk() {
   const isAi = params.get("by") !== "family" // 家人来电=真人；其余为 AI 模拟
 
   const { status, data } = usePatientTalk(voiceId ?? "")
+  const { forMember } = useMemories()
+  const memberId = memberIdForVoice(voiceId ?? "")
+  const memories = forMember(memberId)
+  const [turns, setTurns] = useState<TalkTurn[] | null>(null)
+
+  // 用 companionApi 基于该家人的记忆库生成对话（可插拔；现 mock 织入回忆）。
+  useEffect(() => {
+    if (!data) return
+    let alive = true
+    ;(async () => {
+      const open = await companionApi.generateReply({
+        memberName: data.name,
+        relation: data.relation,
+        memories,
+        turnIndex: 0,
+      })
+      const follow = await companionApi.generateReply({
+        memberName: data.name,
+        relation: data.relation,
+        memories,
+        turnIndex: 1,
+      })
+      if (!alive) return
+      setTurns([
+        { who: "ai", text: open.text },
+        { who: "patient", text: "记得呀……你这么一说，我都想起来了。" },
+        { who: "ai", text: follow.text },
+      ])
+    })()
+    return () => {
+      alive = false
+    }
+  }, [data, memberId, memories.length])
 
   if (status === "loading") return <Connecting />
   if (status === "error" || !data)
     return <GentleNotice onHome={() => navigate("/patient")} />
 
   const tone = data.tone as Tone
+  const shownTurns = turns ?? data.turns
   return (
     <div className="flex h-full">
       {/* 左：来电人 + 状态 + 挂断 */}
@@ -67,7 +104,7 @@ export function PatientTalk() {
       {/* 右：大字幕对话 */}
       <div className="flex w-[60%] flex-col p-8">
         <div className="flex-1 space-y-4 overflow-y-auto">
-          {data.turns.map((turn, i) => (
+          {shownTurns.map((turn, i) => (
             <Bubble key={i} turn={turn} initial={data.initial} tone={tone} />
           ))}
         </div>

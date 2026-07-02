@@ -11,6 +11,7 @@ import { Fallback } from "@/components/Fallback"
 import { CaregiverLayout, PatientLayout } from "@/layouts"
 import { NotFound } from "@/surfaces/NotFound"
 import { FamilyProvider } from "@/state/family"
+import { MemoriesProvider } from "@/state/memories"
 import { MonitorProvider } from "@/state/monitor"
 import { VoicesProvider } from "@/state/voices"
 
@@ -43,6 +44,10 @@ const Settings = lazyPage(
   () => import("@/surfaces/caregiver/Settings"),
   "Settings"
 )
+const Memories = lazyPage(
+  () => import("@/surfaces/caregiver/Memories"),
+  "Memories"
+)
 const PatientHome = lazyPage(
   () => import("@/surfaces/patient/Home"),
   "PatientHome"
@@ -61,6 +66,7 @@ export default function App() {
           <MonitorProvider>
            <FamilyProvider>
             <VoicesProvider>
+            <MemoriesProvider>
             <ErrorBoundary>
               <Suspense fallback={<Fallback />}>
                 <Routes>
@@ -86,6 +92,7 @@ export default function App() {
                     <Route path="memory-cards" element={<MemoryCards />} />
                     <Route path="voices" element={<Voices />} />
                     <Route path="conversations" element={<Conversations />} />
+                    <Route path="memories" element={<Memories />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
 
@@ -100,6 +107,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            </MemoriesProvider>
             </VoicesProvider>
            </FamilyProvider>
           </MonitorProvider>

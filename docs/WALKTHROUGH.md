@@ -45,7 +45,14 @@ npm run dev        # http://localhost:5173/
 ![告警中心](screens/caregiver-alerts.png)
 
 ### 陪伴（聚合页）`/caregiver/care`
-顶部 **远程呼叫患者** —— 以家人身份发起，患者大屏零操作自动接通；下方认人卡 / 声线 / 对话记录入口。
+顶部 **远程呼叫患者** —— 以家人身份发起，患者大屏零操作自动接通；下方认人卡 / 声线 / **记忆库** / 对话记录入口。
+
+### 记忆库 `/caregiver/memories`
+**记忆投喂 → AI 用家人声线陪患者怀旧**（怀旧疗法）。按家人分组，每位家人「＋」投喂一段共同回忆：类型（儿时/日常/大事/地点）、标题、正文（文字），可选**录音音条**（本地不上传）。写回按家人归属的记忆库并持久化；患者与该家人 AI 声线对话时，`companionApi` 把回忆织入开场与后续（如「我刚想起小时候的事——你带我去河边捉萤火虫，你还记得吗？」）。
+「基于记忆生成对话」抽象在可插拔的 `services/companionApi.ts`（`ingestMemory / generateReply`，现 mock），接入 Claude API / 本地模型时只替换该文件。
+
+![记忆库](screens/caregiver-memories.png)
+![讲述你们的故事](screens/caregiver-memory-form.png)
 
 ![陪伴](screens/caregiver-care.png)
 
