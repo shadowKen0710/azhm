@@ -259,3 +259,42 @@ test("算力钱包：充值到账 + 训练扣费", async ({ page }) => {
   // 1550 - 320 = 1230
   await expect(page.getByRole("button", { name: /1,?230 点/ })).toBeVisible()
 })
+
+test("对话记录：列表 → 详情逐句记录", async ({ page }) => {
+  await page.goto("/caregiver/conversations")
+  // 敏感对话置顶
+  await expect(page.getByText("敏感话题").first()).toBeVisible()
+  // 点第一条进入详情
+  await page.getByText("想出门找孩子", { exact: false }).click()
+  await page.waitForURL("**/caregiver/conversations/**")
+  await expect(page.getByText("逐句记录")).toBeVisible()
+  await expect(page.getByText("我要出门去找你", { exact: false })).toBeVisible()
+  // 返回列表
+  await page.getByRole("button", { name: "返回" }).click()
+  await page.waitForURL(/\/caregiver\/conversations$/)
+})
+
+test("患者对话 → 生成对话记录", async ({ page }) => {
+  // 患者与小雯(v1)对话后挂断 → 照护者对话记录新增一条
+  await page.goto("/patient/talk/v1?by=family")
+  await expect(page.getByText("正在和女儿通话")).toBeVisible()
+  await page.getByRole("button", { name: "挂断" }).click()
+  await page.waitForURL(/\/patient$/)
+
+  await page.goto("/caregiver/conversations")
+  // 新记录：小雯的对话，含开场白摘要
+  await expect(page.getByText("小雯").first()).toBeVisible()
+})
+
+test("设置：编辑并保存，刷新后仍在", async ({ page }) => {
+  await page.goto("/caregiver/settings")
+
+  const nameInput = page.locator("input").first() // 患者姓名
+  await nameInput.fill("王奶奶")
+  await page.getByRole("button", { name: "保存修改" }).click()
+  await expect(page.getByRole("button", { name: "已保存" })).toBeVisible()
+
+  // 刷新后仍在（localStorage 持久化）
+  await page.reload()
+  await expect(page.locator("input").first()).toHaveValue("王奶奶")
+})

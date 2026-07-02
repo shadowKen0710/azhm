@@ -10,9 +10,11 @@ import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { Fallback } from "@/components/Fallback"
 import { CaregiverLayout, PatientLayout } from "@/layouts"
 import { NotFound } from "@/surfaces/NotFound"
+import { ConversationsProvider } from "@/state/conversations"
 import { FamilyProvider } from "@/state/family"
 import { MemoriesProvider } from "@/state/memories"
 import { MonitorProvider } from "@/state/monitor"
+import { SettingsProvider } from "@/state/settings"
 import { VoicesProvider } from "@/state/voices"
 import { WalletProvider } from "@/state/wallet"
 
@@ -40,6 +42,10 @@ const Voices = lazyPage(() => import("@/surfaces/caregiver/Voices"), "Voices")
 const Conversations = lazyPage(
   () => import("@/surfaces/caregiver/Conversations"),
   "Conversations"
+)
+const ConversationDetail = lazyPage(
+  () => import("@/surfaces/caregiver/ConversationDetail"),
+  "ConversationDetail"
 )
 const Settings = lazyPage(
   () => import("@/surfaces/caregiver/Settings"),
@@ -71,6 +77,8 @@ export default function App() {
            <FamilyProvider>
             <VoicesProvider>
             <MemoriesProvider>
+            <ConversationsProvider>
+            <SettingsProvider>
             <ErrorBoundary>
               <Suspense fallback={<Fallback />}>
                 <Routes>
@@ -93,6 +101,10 @@ export default function App() {
                     <Route path="memory-cards" element={<MemoryCards />} />
                     <Route path="voices" element={<Voices />} />
                     <Route path="conversations" element={<Conversations />} />
+                    <Route
+                      path="conversations/:id"
+                      element={<ConversationDetail />}
+                    />
                     <Route path="memories" element={<Memories />} />
                     <Route path="wallet" element={<Wallet />} />
                     <Route path="settings" element={<Settings />} />
@@ -109,6 +121,8 @@ export default function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            </SettingsProvider>
+            </ConversationsProvider>
             </MemoriesProvider>
             </VoicesProvider>
            </FamilyProvider>

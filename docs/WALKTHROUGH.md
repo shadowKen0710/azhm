@@ -79,7 +79,7 @@ npm run dev        # http://localhost:5173/
 ![授权录音流程](screens/caregiver-voice-record.png)
 
 ### 对话记录 `/caregiver/conversations`
-**敏感话题置顶红标** + 情绪 chip + 摘要。
+**敏感话题置顶红标** + 情绪 chip + 摘要；点任意卡进**详情页** `/caregiver/conversations/:id`（逐句记录气泡、情绪/时长/敏感徽标、摘要、§9 敏感提示）。对话记录为**可写 store**：患者在对话页挂断时**自动生成一条记录**并持久化，照护者即时可回看。
 
 ![对话记录](screens/caregiver-conversations.png)
 
@@ -94,7 +94,7 @@ npm run dev        # http://localhost:5173/
 ![充值](screens/caregiver-recharge.png)
 
 ### 设置 `/caregiver/settings`
-患者档案 / 主照护者 / 安全区占位（真实定位不在 POC 范围）+ AI 声线授权入口。
+患者档案 / 主照护者 / 安全区 + AI 声线授权入口。**字段可编辑、真实保存**：改动后「保存修改」写回可持久化 store（localStorage），刷新后仍在；未改动时按钮禁用，保存后显示「已保存」。
 
 ![设置](screens/caregiver-settings.png)
 

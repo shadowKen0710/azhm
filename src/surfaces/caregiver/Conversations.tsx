@@ -1,35 +1,26 @@
-import { AlertTriangle, MessagesSquare } from "lucide-react"
+import { AlertTriangle, ChevronRight, MessagesSquare } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
-import {
-  EmptyState,
-  InlineError,
-  PageHeader,
-  Sheet,
-  SkeletonRows,
-} from "@/components/states"
+import { FamilyAvatar } from "@/components/FamilyAvatar"
+import { EmptyState, PageHeader, Sheet } from "@/components/states"
 import { cn } from "@/lib/utils"
-import { toneBg } from "@/lib/tone"
-import { useConversations } from "@/queries/hooks"
-import type {
-  ConversationItem,
-  ConvMood,
-} from "@/services/conversations"
+import { moodMeta, relTime } from "@/surfaces/caregiver/conversationUtils"
+import {
+  useConversationsStore,
+  type ConversationRecord,
+} from "@/state/conversations"
 
-const moods: Record<ConvMood, { label: string; dot: string; text: string }> = {
-  happy: { label: "愉快", dot: "bg-emerald-500", text: "text-emerald-700" },
-  calm: { label: "平稳", dot: "bg-ink/40", text: "text-muted-foreground" },
-  anxious: { label: "焦虑", dot: "bg-amber-500", text: "text-amber-700" },
-  sad: { label: "低落", dot: "bg-sky-500", text: "text-sky-700" },
-}
-
-function formatDuration(sec: number) {
-  const m = Math.floor(sec / 60)
-  const s = sec % 60
-  return `${m} 分 ${String(s).padStart(2, "0")} 秒`
+/** 稳定排序：敏感对话置顶，其余按时间倒序（新的在前）。 */
+function ordered(items: ConversationRecord[]) {
+  return [...items].sort((a, b) => {
+    const s = Number(b.flaggedSensitive) - Number(a.flaggedSensitive)
+    return s !== 0 ? s : b.at - a.at
+  })
 }
 
 export function Conversations() {
-  const { status, data, retry } = useConversations()
+  const { records } = useConversationsStore()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -39,54 +30,52 @@ export function Conversations() {
         subtitle="AI 陪伴对话摘要与情绪信号"
       />
       <Sheet>
-        {status === "loading" && <SkeletonRows rows={3} />}
-        {status === "error" && <InlineError onRetry={retry} />}
-        {status === "success" &&
-          data &&
-          (data.items.length === 0 ? (
-            <EmptyState
-              icon={MessagesSquare}
-              title="还没有对话记录"
-              hint="患者与 AI 家人的对话会在这里留存回看。"
-            />
-          ) : (
-            <div className="space-y-3">
-              {sortSensitiveFirst(data.items).map((item) => (
-                <ConversationCard key={item.id} item={item} />
-              ))}
-            </div>
-          ))}
+        {records.length === 0 ? (
+          <EmptyState
+            icon={MessagesSquare}
+            title="还没有对话记录"
+            hint="患者与 AI 家人的对话会在这里留存回看。"
+          />
+        ) : (
+          <div className="space-y-3">
+            {ordered(records).map((item) => (
+              <ConversationCard
+                key={item.id}
+                item={item}
+                onOpen={() => navigate(`/caregiver/conversations/${item.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </Sheet>
     </>
   )
 }
 
-/** 稳定排序：敏感对话置顶，其余保持原顺序。 */
-function sortSensitiveFirst(items: ConversationItem[]) {
-  return [...items].sort((a, b) => {
-    return Number(b.flaggedSensitive) - Number(a.flaggedSensitive)
-  })
-}
-
-function ConversationCard({ item }: { item: ConversationItem }) {
-  const mood = moods[item.mood]
+function ConversationCard({
+  item,
+  onOpen,
+}: {
+  item: ConversationRecord
+  onOpen: () => void
+}) {
+  const mood = moodMeta[item.mood]
   return (
-    <article
+    <button
+      onClick={onOpen}
       className={cn(
-        "rounded-4xl bg-muted/50 p-4",
+        "w-full rounded-4xl bg-muted/50 p-4 text-left transition-transform active:scale-[0.99]",
         item.flaggedSensitive &&
           "border-l-4 border-destructive bg-destructive/5 ring-2 ring-destructive/25"
       )}
     >
       <div className="flex items-start gap-3">
-        <span
-          className={cn(
-            "grid h-11 w-11 shrink-0 place-items-center rounded-full font-display text-base font-extrabold text-ink",
-            toneBg[item.tone]
-          )}
-        >
-          {item.initial}
-        </span>
+        <FamilyAvatar
+          photo={item.photo}
+          initial={item.initial}
+          tone={item.tone}
+          className="h-11 w-11 text-base"
+        />
         <div className="min-w-0 flex-1">
           <p className="text-[0.95rem] leading-snug text-ink">
             <span className="font-bold">{item.name}</span>
@@ -112,18 +101,16 @@ function ConversationCard({ item }: { item: ConversationItem }) {
             )}
           </div>
         </div>
-        <div className="shrink-0 text-right">
-          <p className="text-xs font-semibold text-muted-foreground">
-            {item.startedAt}
-          </p>
-          <p className="mt-0.5 text-[0.7rem] font-medium text-muted-foreground">
-            {formatDuration(item.durationSec)}
-          </p>
+        <div className="flex shrink-0 items-center gap-1">
+          <span className="text-xs font-semibold text-muted-foreground">
+            {relTime(item.at)}
+          </span>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
       <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
         {item.summary}
       </p>
-    </article>
+    </button>
   )
 }

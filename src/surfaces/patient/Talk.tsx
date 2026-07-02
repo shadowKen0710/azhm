@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Mic, PhoneOff, Sparkles } from "lucide-react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
@@ -7,6 +7,7 @@ import { toneBg, type Tone } from "@/lib/tone"
 import { usePatientTalk } from "@/queries/hooks"
 import { memberIdForVoice, type TalkTurn } from "@/services/patient"
 import { companionApi } from "@/services/companionApi"
+import { useConversationsStore } from "@/state/conversations"
 import { useMemories } from "@/state/memories"
 import { useWallet } from "@/state/wallet"
 
@@ -19,9 +20,11 @@ export function PatientTalk() {
   const { status, data } = usePatientTalk(voiceId ?? "")
   const { forMember } = useMemories()
   const { chargeBestEffort } = useWallet()
+  const { addConversation } = useConversationsStore()
   const memberId = memberIdForVoice(voiceId ?? "")
   const memories = forMember(memberId)
   const [turns, setTurns] = useState<TalkTurn[] | null>(null)
+  const startedRef = useRef<number>(Date.now())
 
   // 用 companionApi 基于该家人的记忆库生成对话（可插拔；现 mock 织入回忆）。
   useEffect(() => {
@@ -53,6 +56,29 @@ export function PatientTalk() {
       alive = false
     }
   }, [data, memberId, memories.length])
+
+  // 挂断：把本次对话记入对话记录（供照护者回看），再回主页。
+  function endCall() {
+    if (data && turns) {
+      addConversation({
+        memberId,
+        name: data.name,
+        relation: data.relation,
+        initial: data.initial,
+        tone: data.tone,
+        at: startedRef.current,
+        durationSec: Math.max(
+          20,
+          Math.round((Date.now() - startedRef.current) / 1000)
+        ),
+        mood: memories.length > 0 ? "happy" : "calm",
+        flaggedSensitive: false,
+        summary: turns.find((t) => t.who === "ai")?.text ?? "一次 AI 声线陪聊。",
+        transcript: turns,
+      })
+    }
+    navigate("/patient")
+  }
 
   if (status === "loading") return <Connecting />
   if (status === "error" || !data)
@@ -97,7 +123,7 @@ export function PatientTalk() {
         </div>
 
         <button
-          onClick={() => navigate("/patient")}
+          onClick={endCall}
           className="mt-4 flex items-center gap-2 rounded-full bg-destructive px-7 py-3 text-lg font-extrabold text-destructive-foreground"
         >
           <PhoneOff className="h-5 w-5" />
