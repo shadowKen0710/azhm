@@ -14,8 +14,11 @@ import { PageHeader, Sheet } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
+  COMPANION_MODEL,
   creditsToCNY,
   creditsPer1k,
+  MODEL_PRICING,
+  modelCreditsPer1k,
   OP_LABEL,
   PAY_METHODS,
   pricePer1kCNY,
@@ -107,6 +110,11 @@ export function Wallet() {
               }
             )}
           </ul>
+          <p className="mt-3 border-t border-border/60 pt-3 text-xs">
+            AI 陪聊接入真实模型后按实际用量计费（{MODEL_PRICING[COMPANION_MODEL].label}
+            ）：约 {modelCreditsPer1k().input} 点/1K 输入 · {modelCreditsPer1k().output}{" "}
+            点/1K 输出。
+          </p>
         </div>
 
         {/* 流水 */}

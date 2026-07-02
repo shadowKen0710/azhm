@@ -10,9 +10,11 @@ import {
   billingApi,
   estimateTokens,
   quoteOp,
+  usageToCredits,
   type BillableOp,
   type PayMethod,
   type RechargePackage,
+  type TokenUsage,
 } from "@/services/billingApi"
 
 // 算力钱包 store：余额（算力点）+ 流水账。localStorage 持久化。
@@ -64,6 +66,8 @@ interface WalletValue {
   charge: (op: BillableOp, textLen?: number) => boolean
   /** 尽力扣费（用于患者对话，不硬阻断）：能扣多少扣多少，恒记录。 */
   chargeBestEffort: (op: BillableOp, textLen?: number) => void
+  /** 按后端返回的真实 token 用量扣费（尽力扣、不硬阻断患者）。接后端后用于 AI 陪聊。 */
+  chargeByUsage: (op: BillableOp, usage: TokenUsage) => void
   recharge: (pkg: RechargePackage, method: PayMethod) => Promise<boolean>
 }
 
@@ -126,6 +130,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const chargeByUsage: WalletValue["chargeByUsage"] = (op, usage) => {
+    const cost = usageToCredits(usage)
+    const tokens = usage.inputTokens + usage.outputTokens
+    setState((s) => {
+      const deducted = Math.min(cost, s.balance)
+      if (deducted <= 0) return s
+      return {
+        balance: s.balance - deducted,
+        ledger: [
+          { id: `sp-${Date.now()}`, kind: "spend", op, credits: -deducted, tokens, at: Date.now() },
+          ...s.ledger,
+        ],
+      }
+    })
+  }
+
   const recharge: WalletValue["recharge"] = async (pkg, method) => {
     const order = await billingApi.createRecharge(pkg)
     const { ok } = await billingApi.confirmPayment(order.orderId, method)
@@ -155,6 +175,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         canAfford,
         charge,
         chargeBestEffort,
+        chargeByUsage,
         recharge,
       }}
     >

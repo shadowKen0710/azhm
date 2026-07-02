@@ -29,6 +29,67 @@ export function creditsToCNY(credits: number) {
   return credits * PRICING.creditValueCNY
 }
 
+// ---------- 真实用量计价（按所选模型的输入/输出单价） ----------
+// 接后端后，AI 陪聊按 Claude 返回的真实 usage 计费，替代上面的均价估算。
+// 见 docs/BACKEND_PLAN.md §4。计价 = token 现金成本 × (1 + markup) → 算力点。
+
+/** 人民币兑美元汇率（用于把模型美元单价折算成人民币，可配置）。 */
+export const USD_TO_CNY = 7.2
+
+export type CompanionModelId =
+  | "claude-opus-4-8"
+  | "claude-sonnet-4-6"
+  | "claude-haiku-4-5"
+
+/** 各模型公开单价（美元 / 1M tokens）。 */
+export const MODEL_PRICING: Record<
+  CompanionModelId,
+  { label: string; inputUsdPerM: number; outputUsdPerM: number }
+> = {
+  "claude-opus-4-8": { label: "Opus 4.8", inputUsdPerM: 5, outputUsdPerM: 25 },
+  "claude-sonnet-4-6": { label: "Sonnet 4.6", inputUsdPerM: 3, outputUsdPerM: 15 },
+  "claude-haiku-4-5": { label: "Haiku 4.5", inputUsdPerM: 1, outputUsdPerM: 5 },
+}
+
+/** 当前用于 AI 陪聊的模型（默认最强 Opus 4.8；走量可改 Sonnet/Haiku）。 */
+export const COMPANION_MODEL: CompanionModelId = "claude-opus-4-8"
+
+/** 后端返回的真实 token 用量。 */
+export interface TokenUsage {
+  inputTokens: number
+  outputTokens: number
+  /** 命中缓存的输入 token（按 ~0.1× 输入价计），可选。 */
+  cacheReadInputTokens?: number
+}
+
+/** 某模型每 1K tokens 折合多少算力点（输入/输出分开，用于展示）。 */
+export function modelCreditsPer1k(model: CompanionModelId = COMPANION_MODEL) {
+  const m = MODEL_PRICING[model]
+  const toCredits = (usdPerM: number) =>
+    (usdPerM / 1000) * USD_TO_CNY * (1 + PRICING.markup) / PRICING.creditValueCNY
+  return {
+    input: Math.round(toCredits(m.inputUsdPerM) * 10) / 10,
+    output: Math.round(toCredits(m.outputUsdPerM) * 10) / 10,
+  }
+}
+
+/** 真实 usage → 算力点（含 60% 利润，向上取整，至少 1 点）。 */
+export function usageToCredits(
+  usage: TokenUsage,
+  model: CompanionModelId = COMPANION_MODEL
+): number {
+  const m = MODEL_PRICING[model]
+  const cnyPerToken = (usdPerM: number) =>
+    (usdPerM / 1_000_000) * USD_TO_CNY * (1 + PRICING.markup)
+  const cache = usage.cacheReadInputTokens ?? 0
+  const freshInput = Math.max(0, usage.inputTokens - cache)
+  const cny =
+    freshInput * cnyPerToken(m.inputUsdPerM) +
+    cache * cnyPerToken(m.inputUsdPerM) * 0.1 + // 缓存读取约 0.1×
+    usage.outputTokens * cnyPerToken(m.outputUsdPerM)
+  return Math.max(1, Math.ceil(cny / PRICING.creditValueCNY))
+}
+
 // ---------- 各操作的 token 估算 ----------
 export type BillableOp = "voice-train" | "memory-ingest" | "dialogue"
 
