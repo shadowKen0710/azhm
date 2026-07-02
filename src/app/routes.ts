@@ -9,6 +9,7 @@ export const ROUTES = {
   voices: "/caregiver/voices",
   conversations: "/caregiver/conversations",
   memories: "/caregiver/memories",
+  wallet: "/caregiver/wallet",
   settings: "/caregiver/settings",
   patient: "/patient",
   patientTalk: (voiceId: string) => `/patient/talk/${voiceId}`,

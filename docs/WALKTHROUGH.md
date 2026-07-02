@@ -75,6 +75,16 @@ npm run dev        # http://localhost:5173/
 
 ![对话记录](screens/caregiver-conversations.png)
 
+### 算力钱包 `/caregiver/wallet`
+**按用量计费的算力充值/扣费**。透明计价：`token 现金成本 × 1.6（含 60% 利润）` 折算为「算力点」（当前每 1K tokens = ¥0.08 = 8 点；1 点 = ¥0.01）。
+- 余额卡 + 顶栏余额胶囊；充值套餐（含赠送）+ 支付方式（**信用卡 / PayPal / 支付宝 / 微信支付**，mock 结账）+ 流水账。
+- 扣费点：**训练声线**（约 320 点）、**投喂记忆**（随文本长度）、**AI 陪聊**（按会话）。
+- 训练/投喂在余额不足时**拦截并引导充值**；患者对话为「尽力扣费、绝不硬阻断」（患者关怀优先）。
+- 支付与计价抽象在可插拔的 `services/billingApi.ts`（`createRecharge / confirmPayment`），接 Stripe/PayPal/支付宝/微信只替换该文件；真实支付需后端+商户号，不在静态部署范围。
+
+![算力钱包](screens/caregiver-wallet.png)
+![充值](screens/caregiver-recharge.png)
+
 ### 设置 `/caregiver/settings`
 患者档案 / 主照护者 / 安全区占位（真实定位不在 POC 范围）+ AI 声线授权入口。
 

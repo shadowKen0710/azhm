@@ -8,6 +8,7 @@ import { usePatientTalk } from "@/queries/hooks"
 import { memberIdForVoice, type TalkTurn } from "@/services/patient"
 import { companionApi } from "@/services/companionApi"
 import { useMemories } from "@/state/memories"
+import { useWallet } from "@/state/wallet"
 
 export function PatientTalk() {
   const { voiceId } = useParams()
@@ -17,6 +18,7 @@ export function PatientTalk() {
 
   const { status, data } = usePatientTalk(voiceId ?? "")
   const { forMember } = useMemories()
+  const { chargeBestEffort } = useWallet()
   const memberId = memberIdForVoice(voiceId ?? "")
   const memories = forMember(memberId)
   const [turns, setTurns] = useState<TalkTurn[] | null>(null)
@@ -25,6 +27,8 @@ export function PatientTalk() {
   useEffect(() => {
     if (!data) return
     let alive = true
+    // AI 陪聊按会话计费；尽力扣费，绝不硬阻断患者（患者关怀优先，见 §11）。
+    chargeBestEffort("dialogue")
     ;(async () => {
       const open = await companionApi.generateReply({
         memberName: data.name,

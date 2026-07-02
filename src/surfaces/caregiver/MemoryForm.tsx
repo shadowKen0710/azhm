@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { useMemories } from "@/state/memories"
+import { useWallet } from "@/state/wallet"
 import type { MemoryTag } from "@/services/companionApi"
 import type { VoiceProfileView } from "@/state/voices"
 
@@ -29,6 +30,7 @@ export function MemoryForm({
   onClose: () => void
 }) {
   const { addMemory } = useMemories()
+  const { charge, quote } = useWallet()
 
   const [title, setTitle] = useState("")
   const [text, setText] = useState("")
@@ -86,6 +88,13 @@ export function MemoryForm({
   function submit() {
     if (!text.trim()) {
       setError("请写下这段回忆的内容。")
+      return
+    }
+    // 投喂记忆按文本长度扣算力；余额不足则拦截。
+    if (!charge("memory-ingest", text.trim().length)) {
+      setError(
+        `算力不足（需 ${quote("memory-ingest", text.trim().length)} 点），请先充值。`
+      )
       return
     }
     addMemory({

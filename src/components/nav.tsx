@@ -1,24 +1,38 @@
-import { HeartHandshake, House, LogOut, Pill, Settings, Siren } from "lucide-react"
+import {
+  Coins,
+  HeartHandshake,
+  House,
+  LogOut,
+  Pill,
+  Settings,
+  Siren,
+} from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
 import { DemoToggle } from "@/components/demo"
 import { cn } from "@/lib/utils"
+import { useWallet } from "@/state/wallet"
 
-/** 顶栏：角色切换（照护者 / 患者）+ 演示态开关 + 已登录用户/退出。 */
+/** 顶栏：角色切换（照护者 / 患者）+ 演示态开关 + 已登录用户/退出 + 算力余额。 */
 export function TopBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
+  const { balance } = useWallet()
   const isPatient = pathname.startsWith("/patient")
 
   return (
     <div className="mb-5 space-y-3">
       {isAuthenticated && (
         <div className="flex items-center justify-between px-1">
-          <span className="text-sm font-semibold text-muted-foreground">
-            {user?.name} · 照护者
-          </span>
+          <button
+            onClick={() => navigate("/caregiver/wallet")}
+            className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-bold text-cream shadow-soft"
+          >
+            <Coins className="h-4 w-4 text-sun" />
+            {balance.toLocaleString()} 点
+          </button>
           <button
             onClick={() => {
               logout()

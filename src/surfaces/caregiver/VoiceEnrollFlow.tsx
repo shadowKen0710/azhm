@@ -1,12 +1,30 @@
 import { useEffect, useRef, useState } from "react"
-import { Check, Mic, Play, RotateCcw, ShieldCheck, Square, X } from "lucide-react"
+import {
+  Check,
+  Coins,
+  Mic,
+  Play,
+  RotateCcw,
+  ShieldCheck,
+  Square,
+  X,
+} from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 import { FamilyAvatar } from "@/components/FamilyAvatar"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useVoicesStore, type VoiceProfileView } from "@/state/voices"
+import { useWallet } from "@/state/wallet"
+import { quoteOp } from "@/services/billingApi"
 
-type Step = "consent" | "record" | "review" | "training" | "done"
+type Step =
+  | "consent"
+  | "record"
+  | "review"
+  | "training"
+  | "done"
+  | "insufficient"
 
 const SAMPLE_TEXT = "爸，是我呀。今天有没有好好吃饭？记得按时吃药，我陪着你。"
 
@@ -19,6 +37,9 @@ export function VoiceEnrollFlow({
   onClose: () => void
 }) {
   const { authorize, profiles } = useVoicesStore()
+  const { charge, balance } = useWallet()
+  const navigate = useNavigate()
+  const trainCost = quoteOp("voice-train")
   const [step, setStep] = useState<Step>("consent")
   const [consent, setConsent] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -114,6 +135,11 @@ export function VoiceEnrollFlow({
 
   async function submit() {
     if (!blobRef.current) return
+    // 训练声线扣算力；余额不足则拦截并引导充值。
+    if (!charge("voice-train")) {
+      setStep("insufficient")
+      return
+    }
     setStep("training")
     await authorize(member.memberId, {
       blob: blobRef.current,
@@ -278,7 +304,34 @@ export function VoiceEnrollFlow({
                 开始学习
               </Button>
             </div>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              训练将消耗 {trainCost} 算力点（余额 {balance} 点）
+            </p>
           </>
+        )}
+
+        {/* 余额不足 */}
+        {step === "insufficient" && (
+          <div className="mt-6 flex flex-col items-center text-center">
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-destructive/10 text-destructive">
+              <Coins className="h-8 w-8" />
+            </span>
+            <p className="mt-4 font-display text-xl font-extrabold text-ink">
+              算力不足
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              训练声线需 {trainCost} 点，当前余额 {balance} 点。充值后即可继续。
+            </p>
+            <Button
+              className="mt-6 w-full"
+              onClick={() => {
+                onClose()
+                navigate("/caregiver/wallet")
+              }}
+            >
+              去充值
+            </Button>
+          </div>
         )}
 
         {/* 训练中 */}

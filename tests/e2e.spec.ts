@@ -214,3 +214,37 @@ test("记忆库：看护者投喂故事 → 患者对话引用该回忆", async 
     { timeout: 8000 }
   )
 })
+
+test("算力钱包：充值到账 + 训练扣费", async ({ page }) => {
+  await page.goto("/caregiver/wallet")
+
+  // 顶栏余额胶囊（初始 500 点）
+  await expect(page.getByRole("button", { name: /500 点/ })).toBeVisible()
+
+  // 充值 1000 点套餐（含赠 50）→ 支付宝 → 成功
+  await page.getByRole("button", { name: "充值算力" }).click()
+  await page.getByRole("button", { name: /1000 点/ }).click()
+  await page.getByRole("button", { name: "支付宝" }).click()
+  await page.getByRole("button", { name: /支付 ¥/ }).click()
+  await expect(page.getByText("充值成功")).toBeVisible({ timeout: 8000 })
+  await page.getByRole("button", { name: "完成" }).click()
+  // 500 + 1000 + 50 = 1550
+  await expect(page.getByRole("button", { name: /1,?550 点/ })).toBeVisible()
+
+  // 去训练小雯声线（扣 320 点）→ 余额应下降
+  await page.goto("/caregiver/voices")
+  // 小雯已就绪，先撤销再重新授权以触发训练；或直接训练已撤销的建国
+  await page.getByRole("button", { name: "重新授权" }).click()
+  await page.getByRole("button", { name: "确认同意" }).click()
+  await page.getByRole("button", { name: "下一步 · 录音" }).click()
+  await page.getByRole("button", { name: "开始录音" }).click()
+  await page.waitForTimeout(2600)
+  await page.getByRole("button", { name: "停止录音" }).click()
+  await page.getByRole("button", { name: "开始学习" }).click()
+  await expect(page.getByText("声线已就绪", { exact: false })).toBeVisible({
+    timeout: 15_000,
+  })
+  await page.getByRole("button", { name: "完成" }).click()
+  // 1550 - 320 = 1230
+  await expect(page.getByRole("button", { name: /1,?230 点/ })).toBeVisible()
+})

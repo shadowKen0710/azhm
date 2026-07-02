@@ -2,6 +2,7 @@ import {
   AudioLines,
   BookHeart,
   ChevronRight,
+  Coins,
   MessagesSquare,
   PhoneCall,
   UsersRound,
@@ -44,6 +45,12 @@ const entries: Entry[] = [
     icon: MessagesSquare,
     title: "对话记录",
     desc: "回看 AI 陪伴对话与情绪变化",
+  },
+  {
+    to: "/caregiver/wallet",
+    icon: Coins,
+    title: "算力钱包",
+    desc: "按用量计费，充值与流水",
   },
 ]
 

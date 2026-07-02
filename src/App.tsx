@@ -14,6 +14,7 @@ import { FamilyProvider } from "@/state/family"
 import { MemoriesProvider } from "@/state/memories"
 import { MonitorProvider } from "@/state/monitor"
 import { VoicesProvider } from "@/state/voices"
+import { WalletProvider } from "@/state/wallet"
 
 // 页面按路由懒加载（代码分割）。
 const lazyPage = <T extends Record<string, React.ComponentType>>(
@@ -48,6 +49,7 @@ const Memories = lazyPage(
   () => import("@/surfaces/caregiver/Memories"),
   "Memories"
 )
+const Wallet = lazyPage(() => import("@/surfaces/caregiver/Wallet"), "Wallet")
 const PatientHome = lazyPage(
   () => import("@/surfaces/patient/Home"),
   "PatientHome"
@@ -62,6 +64,7 @@ export default function App() {
   return (
     <DemoProvider>
       <AuthProvider>
+        <WalletProvider>
         <CallProvider>
           <MonitorProvider>
            <FamilyProvider>
@@ -93,6 +96,7 @@ export default function App() {
                     <Route path="voices" element={<Voices />} />
                     <Route path="conversations" element={<Conversations />} />
                     <Route path="memories" element={<Memories />} />
+                    <Route path="wallet" element={<Wallet />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
 
@@ -112,6 +116,7 @@ export default function App() {
            </FamilyProvider>
           </MonitorProvider>
         </CallProvider>
+        </WalletProvider>
       </AuthProvider>
     </DemoProvider>
   )
