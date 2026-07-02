@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react"
-import { Navigate, Route, Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom"
 
 import { AuthProvider } from "@/auth/AuthContext"
 import { Login } from "@/auth/Login"
@@ -50,6 +50,7 @@ const Memories = lazyPage(
   "Memories"
 )
 const Wallet = lazyPage(() => import("@/surfaces/caregiver/Wallet"), "Wallet")
+const Landing = lazyPage(() => import("@/surfaces/Landing"), "Landing")
 const PatientHome = lazyPage(
   () => import("@/surfaces/patient/Home"),
   "PatientHome"
@@ -73,11 +74,8 @@ export default function App() {
             <ErrorBoundary>
               <Suspense fallback={<Fallback />}>
                 <Routes>
+                  <Route path="/" element={<Landing />} />
                   <Route path="/login" element={<Login />} />
-                  <Route
-                    path="/"
-                    element={<Navigate to="/caregiver" replace />}
-                  />
 
                   {/* 照护者控制台：受保护 */}
                   <Route

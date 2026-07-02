@@ -33,7 +33,10 @@
       "Bash(curl -s -L \"https://shadowken0710.github.io/azhm/patient?remind=1\")",
       "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=520,760 --virtual-time-budget=1500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/F-login.png http://localhost:5173/login)",
       "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=520,600 --virtual-time-budget=1500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/F-404.png http://localhost:5173/nope-xyz)",
-      "Bash(node -e \"console.log\\(Object.keys\\(require\\('./package.json'\\).dependencies\\).filter\\(d=>d.includes\\('radix'\\)\\)\\)\")"
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('./package.json'\\).dependencies\\).filter\\(d=>d.includes\\('radix'\\)\\)\\)\")",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=1200,3400 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/LP-full.png http://localhost:5173/)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 --window-size=1200,900 --virtual-time-budget=2500 --screenshot=/private/tmp/claude-502/-Users-gengjiayi-azhm/64e5d0b2-c55e-4fa5-89dd-7b90142d32da/scratchpad/LP-hero.png http://localhost:5173/)",
+      "Bash(awk '{print $5,$9}')"
     ]
   }
 }

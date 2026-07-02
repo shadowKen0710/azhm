@@ -12,6 +12,17 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
+test("落地页公开可访问，CTA 通向登录", async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem("azhm.auth"))
+  await page.goto("/")
+  await expect(
+    page.getByRole("heading", { name: /陪 TA 慢慢想起/ })
+  ).toBeVisible()
+  await expect(page.getByText("明明白白，用多少付多少")).toBeVisible()
+  await page.getByRole("link", { name: "照护者登录" }).first().click()
+  await page.waitForURL("**/login")
+})
+
 test("未登录访问照护者 → 跳登录 → 登录后进入", async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem("azhm.auth"))
   await page.goto("/caregiver/alerts")

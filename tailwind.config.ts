@@ -63,9 +63,14 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.55" },
         },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "pulse-soft": "pulse-soft 1.6s ease-in-out infinite",
+        "fade-up": "fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
       },
     },
   },

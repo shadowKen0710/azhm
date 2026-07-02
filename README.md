@@ -3,7 +3,7 @@
 **在线预览**：https://shadowken0710.github.io/azhm/ ·
 **仓库**：https://github.com/shadowKen0710/azhm
 
-> 照护者控制台需登录（`/login` 一键演示登录）；患者大屏为公开 kiosk 无需登录。
+> 打开 `/` 是对外落地/定价页；照护者控制台需登录（`/login` 一键演示登录）；患者大屏为公开 kiosk 无需登录。
 > 患者大屏被动事件可直达：
 > [家人来电](https://shadowken0710.github.io/azhm/patient?call=family) ·
 > [AI 来电](https://shadowken0710.github.io/azhm/patient?call=ai) ·
