@@ -1,0 +1,11 @@
+name = "azhm-companion"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 允许跨域的前端来源（部署后改成你的 Pages 域名）。
+[vars]
+ALLOWED_ORIGIN = "https://shadowken0710.github.io"
+
+# ANTHROPIC_API_KEY 用 secret 注入，不要写进这里：
+#   wrangler secret put ANTHROPIC_API_KEY

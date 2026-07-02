@@ -51,8 +51,8 @@ export const MODEL_PRICING: Record<
   "claude-haiku-4-5": { label: "Haiku 4.5", inputUsdPerM: 1, outputUsdPerM: 5 },
 }
 
-/** 当前用于 AI 陪聊的模型（默认最强 Opus 4.8；走量可改 Sonnet/Haiku）。 */
-export const COMPANION_MODEL: CompanionModelId = "claude-opus-4-8"
+/** 当前用于 AI 陪聊的模型（选 Haiku 4.5：成本最低，适合高频陪聊）。 */
+export const COMPANION_MODEL: CompanionModelId = "claude-haiku-4-5"
 
 /** 后端返回的真实 token 用量。 */
 export interface TokenUsage {

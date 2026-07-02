@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { toneBg, type Tone } from "@/lib/tone"
 import { usePatientTalk } from "@/queries/hooks"
 import { memberIdForVoice, type TalkTurn } from "@/services/patient"
-import { companionApi } from "@/services/companionApi"
+import { getCompanionApi } from "@/services/companionApi"
 import { useConversationsStore } from "@/state/conversations"
 import { useMemories } from "@/state/memories"
 import { useWallet } from "@/state/wallet"
@@ -19,38 +19,52 @@ export function PatientTalk() {
 
   const { status, data } = usePatientTalk(voiceId ?? "")
   const { forMember } = useMemories()
-  const { chargeBestEffort } = useWallet()
+  const { chargeBestEffort, chargeByUsage } = useWallet()
   const { addConversation } = useConversationsStore()
   const memberId = memberIdForVoice(voiceId ?? "")
   const memories = forMember(memberId)
   const [turns, setTurns] = useState<TalkTurn[] | null>(null)
   const startedRef = useRef<number>(Date.now())
 
-  // 用 companionApi 基于该家人的记忆库生成对话（可插拔；现 mock 织入回忆）。
+  // 用 companionApi 基于该家人的记忆库生成对话（可插拔：真实 Claude 或 mock）。
   useEffect(() => {
     if (!data) return
     let alive = true
-    // AI 陪聊按会话计费；尽力扣费，绝不硬阻断患者（患者关怀优先，见 §11）。
-    chargeBestEffort("dialogue")
+    const { api, real } = getCompanionApi()
+    // mock：按会话估算尽力扣费。真实：按后端返回的真实 token 用量逐轮扣费。
+    if (!real) chargeBestEffort("dialogue")
     ;(async () => {
-      const open = await companionApi.generateReply({
-        memberName: data.name,
-        relation: data.relation,
-        memories,
-        turnIndex: 0,
-      })
-      const follow = await companionApi.generateReply({
-        memberName: data.name,
-        relation: data.relation,
-        memories,
-        turnIndex: 1,
-      })
-      if (!alive) return
-      setTurns([
-        { who: "ai", text: open.text },
-        { who: "patient", text: "记得呀……你这么一说，我都想起来了。" },
-        { who: "ai", text: follow.text },
-      ])
+      try {
+        const ask = (turnIndex: number) =>
+          api.generateReply({
+            memberName: data.name,
+            relation: data.relation,
+            memories,
+            turnIndex,
+            disclose: isAi,
+          })
+        const open = await ask(0)
+        const follow = await ask(1)
+        if (!alive) return
+        if (real) {
+          if (open.usage) chargeByUsage("dialogue", open.usage)
+          if (follow.usage) chargeByUsage("dialogue", follow.usage)
+        }
+        setTurns([
+          { who: "ai", text: open.text },
+          { who: "patient", text: "记得呀……你这么一说，我都想起来了。" },
+          { who: "ai", text: follow.text },
+        ])
+      } catch {
+        // 真实后端失败：温和退化，绝不给患者报错。
+        if (!alive) return
+        setTurns([
+          {
+            who: "ai",
+            text: `${data.name}这边信号不太好，我们待会儿再聊。你先歇一会儿。`,
+          },
+        ])
+      }
     })()
     return () => {
       alive = false

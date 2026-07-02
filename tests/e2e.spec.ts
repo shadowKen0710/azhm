@@ -298,3 +298,32 @@ test("设置：编辑并保存，刷新后仍在", async ({ page }) => {
   await page.reload()
   await expect(page.locator("input").first()).toHaveValue("王奶奶")
 })
+
+test("真实 AI 对话：配置+同意后走后端，按真实 token 扣费", async ({ page }) => {
+  // 注入后端地址 + 同意（真实实现的启用条件），并 seed 登录态
+  await page.addInitScript(() => {
+    localStorage.setItem("azhm.companion.url", "https://stub.local")
+    localStorage.setItem("azhm.companion.consent", "1")
+  })
+  // 拦截后端，返回固定文本与真实用量（不真花钱）
+  await page.route("**/companion/reply", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        text: "爸，我是小雯，想起小时候放风筝啦。",
+        flaggedSensitive: false,
+        usage: { inputTokens: 1000, outputTokens: 1000, cacheReadInputTokens: 0 },
+      }),
+    })
+  )
+
+  await page.goto("/patient/talk/v1?by=ai")
+  // 真实回复文本出现（说明走了后端而非 mock）
+  await expect(
+    page.getByText("想起小时候放风筝", { exact: false }).first()
+  ).toBeVisible({ timeout: 8000 })
+
+  // Haiku 4.5 计价：每轮 ~7 点，两轮 → 500-14=486
+  await expect(page.getByRole("button", { name: /486 点/ })).toBeVisible()
+})

@@ -12,9 +12,15 @@ import {
 import { InlineError, PageHeader, Sheet, SkeletonRows } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 import { useSettings } from "@/queries/hooks"
 import { useSettingsStore } from "@/state/settings"
 import type { SettingsData } from "@/services/settings"
+import {
+  isCompanionConfigured,
+  isCompanionConsented,
+  setCompanionConsent,
+} from "@/services/companionApi"
 
 export function Settings() {
   // 查询用于四态外壳（加载/错误演示）；正常态用可写设置 store。
@@ -116,6 +122,9 @@ function SettingsForm() {
           <span className="text-sm font-bold text-ink">AI 声线授权管理</span>
           <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
         </Link>
+        <div className="border-t border-border/60 pt-3.5">
+          <CompanionConsentRow />
+        </div>
       </GroupCard>
 
       <div className="flex flex-col items-center gap-2 pt-1">
@@ -187,6 +196,49 @@ function EditField({
           {hint}
         </p>
       )}
+    </div>
+  )
+}
+
+/** 真实 AI 对话的数据出境同意（见 docs/BACKEND_PLAN.md §6）。 */
+function CompanionConsentRow() {
+  const configured = isCompanionConfigured()
+  const [consent, setConsent] = useState(isCompanionConsented())
+
+  function toggle() {
+    const next = !consent
+    setCompanionConsent(next)
+    setConsent(next)
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-ink">真实 AI 对话</p>
+        <p className="mt-0.5 text-[0.68rem] leading-snug text-muted-foreground">
+          {configured
+            ? "开启后，会将你录入的回忆发送到 AI 服务生成回复，可随时关闭。"
+            : "未配置 AI 服务，暂不可用（部署后端后启用）。"}
+        </p>
+      </div>
+      <button
+        role="switch"
+        aria-checked={consent}
+        aria-label="真实 AI 对话"
+        disabled={!configured}
+        onClick={toggle}
+        className={cn(
+          "relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-40",
+          consent ? "bg-ink" : "bg-muted"
+        )}
+      >
+        <span
+          className={cn(
+            "absolute top-1 h-5 w-5 rounded-full bg-cream transition-transform",
+            consent ? "translate-x-6" : "translate-x-1"
+          )}
+        />
+      </button>
     </div>
   )
 }
