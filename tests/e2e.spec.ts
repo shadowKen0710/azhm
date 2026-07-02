@@ -163,3 +163,35 @@ test("认人卡：新增 → 编辑 → 删除", async ({ page }) => {
   await page.getByRole("button", { name: "确认删除" }).click()
   await expect(page.getByText("测试家人乙", { exact: true })).toHaveCount(0)
 })
+
+test("声线授权：录音 → 训练 → 就绪，撤销后患者不可对话", async ({ page }) => {
+  await page.goto("/caregiver/voices")
+
+  // 建国(f2) 种子为已撤销 → 重新授权，进入录音流程
+  await page.getByRole("button", { name: "重新授权" }).click()
+
+  // 同意 → 录音
+  await page.getByRole("button", { name: "确认同意" }).click()
+  await page.getByRole("button", { name: "下一步 · 录音" }).click()
+
+  // 真实麦克风（假设备）录音 ≥2s → 停止
+  await page.getByRole("button", { name: "开始录音" }).click()
+  await page.waitForTimeout(2600)
+  await page.getByRole("button", { name: "停止录音" }).click()
+
+  // 试听 → 开始学习 → 训练 → 就绪
+  await page.getByRole("button", { name: "开始学习" }).click()
+  await expect(page.getByText("声线已就绪", { exact: false })).toBeVisible({
+    timeout: 15_000,
+  })
+  await page.getByRole("button", { name: "完成" }).click()
+
+  // 撤销授权 → 患者端该家人「暂不可对话」
+  await page.goto("/caregiver/voices")
+  // 小雯(f1) 为第一张可用卡 → 撤销其授权
+  await page.getByRole("button", { name: "撤销授权" }).first().click()
+  await page.getByRole("button", { name: "确认撤销" }).first().click()
+
+  await page.goto("/patient")
+  await expect(page.getByText("暂不可对话").first()).toBeVisible()
+})

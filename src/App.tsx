@@ -12,6 +12,7 @@ import { CaregiverLayout, PatientLayout } from "@/layouts"
 import { NotFound } from "@/surfaces/NotFound"
 import { FamilyProvider } from "@/state/family"
 import { MonitorProvider } from "@/state/monitor"
+import { VoicesProvider } from "@/state/voices"
 
 // 页面按路由懒加载（代码分割）。
 const lazyPage = <T extends Record<string, React.ComponentType>>(
@@ -59,6 +60,7 @@ export default function App() {
         <CallProvider>
           <MonitorProvider>
            <FamilyProvider>
+            <VoicesProvider>
             <ErrorBoundary>
               <Suspense fallback={<Fallback />}>
                 <Routes>
@@ -98,6 +100,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            </VoicesProvider>
            </FamilyProvider>
           </MonitorProvider>
         </CallProvider>

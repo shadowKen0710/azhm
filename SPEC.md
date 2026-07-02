@@ -275,7 +275,7 @@ Mood           = 'calm'|'happy'|'anxious'|'confused'|'sad'
 
 ## 10. POC 明确不做（非目标）
 
-- ❌ **真实语音克隆 / ASR / TTS**：用预置音频或浏览器 `SpeechSynthesis` 兜底模拟，对话用预置/规则回应。
+- ⚠️ **真实语音克隆 / ASR / TTS**：录音为**真实麦克风采集**（浏览器 MediaRecorder，本地处理不上传）；「训练 + 合成」抽象在可插拔接口 `services/voiceApi.ts`（`enrollVoice/pollTraining/synthesize`），当前为 **mock 模拟进度**。接入真实后端（GPT-SoVITS / Replicate / HF 等）**只需替换该文件**——但真实推理需独立 GPU 后端，**不在当前静态部署范围**。对话回应仍为预置/规则。
 - ❌ **真实账号 / 登录 / 鉴权**：角色切换为纯前端模拟，无注册、密码、真实身份。
 - ❌ **推送 / 短信 / 电话 / 信令集成**：所有告警、SOS、来电通知仅在应用内模拟展示；跨端来电用前端 `CallProvider` 总线打通，不接真实推送/WebRTC/信令通道。
 - ❌ **真实 GPS / 地图 SDK / 电子围栏**：定位相关一律 mock；安全区在设置里仅占位说明。

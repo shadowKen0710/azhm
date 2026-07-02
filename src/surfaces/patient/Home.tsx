@@ -21,6 +21,7 @@ import {
   type MonReminder,
   type MonReminderIcon,
 } from "@/state/monitor"
+import { useVoicesStore } from "@/state/voices"
 import { cn } from "@/lib/utils"
 import { toneBg } from "@/lib/tone"
 import { usePatientHome } from "@/queries/hooks"
@@ -216,9 +217,12 @@ export function PatientHome() {
 
 function FamilyTile({ m }: { m: PatientFamily }) {
   const navigate = useNavigate()
+  const { isVoiceReady } = useVoicesStore()
+  // 声线可用性以声线 store 为准（照护者授权/撤销即时联动）。
+  const available = isVoiceReady(m.id)
   return (
     <button
-      disabled={!m.voiceAvailable}
+      disabled={!available}
       onClick={() => navigate(`/patient/talk/${m.voiceId}`)}
       className="flex items-center gap-3 rounded-4xl bg-card px-4 py-3 text-left shadow-soft transition-transform active:scale-[0.98] disabled:opacity-40"
     >
@@ -235,7 +239,7 @@ function FamilyTile({ m }: { m: PatientFamily }) {
           {m.name}
         </span>
         <span className="block text-sm font-semibold text-muted-foreground">
-          {m.voiceAvailable ? m.relation : "暂不可对话"}
+          {available ? m.relation : "暂不可对话"}
         </span>
       </span>
     </button>

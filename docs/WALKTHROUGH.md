@@ -57,9 +57,11 @@ npm run dev        # http://localhost:5173/
 ![新增/编辑家人表单](screens/caregiver-member-form.png)
 
 ### 声线管理 `/caregiver/voices`
-**授权录制提示（伦理边界）** + 学习进度可视化占位 + 撤销/重新授权。
+**授权录制全流程**：授权声明勾选 → **真实麦克风录音**（MediaRecorder + 实时波形/计时）→ 本地试听 → 训练进度轮询 → 就绪。撤销/重新授权（二次确认）；撤销后患者端该家人即时「暂不可对话」。录音**仅在本机处理、不上传**。
+「训练+合成」抽象在可插拔的 `services/voiceApi.ts`（现为 mock 模拟进度）；接入 GPT-SoVITS / Replicate / HF 等真实后端时**只替换该文件**，接口 `enrollVoice / pollTraining / synthesize` 不变，上层无需改动。
 
 ![声线管理](screens/caregiver-voices.png)
+![授权录音流程](screens/caregiver-voice-record.png)
 
 ### 对话记录 `/caregiver/conversations`
 **敏感话题置顶红标** + 情绪 chip + 摘要。
